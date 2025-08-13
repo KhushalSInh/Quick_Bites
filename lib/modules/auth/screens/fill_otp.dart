@@ -88,7 +88,9 @@ class _OtpScreenState extends State<OtpScreen> {
   void _handleResend() {
     if (_isResendAvailable) {
       resendOtp();
-      _controllers.forEach((c) => c.clear());
+      for (var c in _controllers) {
+        c.clear();
+      }
       _focusNodes[0].requestFocus();
       _startResendTimer();
     }
