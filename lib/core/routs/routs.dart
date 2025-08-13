@@ -4,6 +4,7 @@ class AppRoutes {
   static const login = '/login';
   static const signup = '/signup';
   static const forgetPassword = '/forgetPassword';
-    static const fillOtp = '/fillOtp';
+  static const fillOtp = '/fillOtp';
   static const home = '/home';
+
 }
