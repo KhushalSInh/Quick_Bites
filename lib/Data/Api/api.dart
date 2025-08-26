@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiDetails {
-  static var loginApi = "http://10.234.113.123/quickbites/login.php";
 
-  static var singupApi = "http://10.234.113.123/quickbites/singup.php";
-  // http://192.168.0.35/qucikbites/login.php
+   static String ip = "10.16.73.123"; 
+
+  static String get loginApi => "http://$ip/quickbites/login.php";
+  static String get singupApi => "http://$ip/quickbites/singup.php";
+ 
 }
 
 class ApiService {

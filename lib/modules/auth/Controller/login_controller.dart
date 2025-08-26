@@ -9,6 +9,7 @@ import 'package:quick_bites/Data/Api/api.dart';
 import 'package:quick_bites/core/routs/routs.dart';
 import 'package:quick_bites/core/utils/dialog_helper.dart';
 import 'package:quick_bites/widgets/custom_message_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginController extends GetxController {
   final emialController = TextEditingController();
@@ -16,6 +17,7 @@ class LoginController extends GetxController {
   final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
   // For password visibility toggle
   var isPasswordVisible = false.obs;
+  bool? isLogin = false;
 
   // For form validation (optional)
   final formKey = GlobalKey<FormState>();
@@ -43,6 +45,7 @@ class LoginController extends GetxController {
 
   void login(BuildContext context) async {
     // Do login logic
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       var url = Uri.parse(ApiDetails.loginApi);
 
@@ -63,6 +66,7 @@ class LoginController extends GetxController {
             message: "Login sucessfully.",
             type: MessageType.success,
           );
+          prefs.setBool("IsLogin", true);
           Future.delayed(Duration(seconds: 2), () {
             Navigator.pushNamedAndRemoveUntil(
               context,
@@ -74,24 +78,44 @@ class LoginController extends GetxController {
           showCustomMessageDialog(
             // "Login failed. Incorrect username or password."
             context,
-            message:data['message'],
+            message: data['message'],
             type: MessageType.error,
           );
         }
       } else {
-         showCustomMessageDialog(
-            context,
-            message:data['message'],
-            type: MessageType.error,
-          );
+        showCustomMessageDialog(
+          context,
+          message: data['message'],
+          type: MessageType.error,
+        );
         print(data['message'] ?? 'An unexpected error occurred');
       }
     } catch (e) {
-       showCustomMessageDialog(
-            context,
-            message:"Connection Error $e",
-            type: MessageType.error,
-          );
+      showCustomMessageDialog(
+        context,
+        message: "Connection Error $e",
+        type: MessageType.error,
+      );
+    }
+  }
+
+  void skipLogin(BuildContext context) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    isLogin = prefs.getBool("IsLogin");
+
+    if (isLogin == true) {
+      Navigator.pushNamedAndRemoveUntil(
+              context,
+              AppRoutes.home,
+              (route) => false,
+            );
+    } else {
+      Navigator.pushNamedAndRemoveUntil(
+              context,
+              AppRoutes.welcome,
+              (route) => false,
+            );
     }
   }
 
