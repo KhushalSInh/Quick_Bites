@@ -8,6 +8,7 @@ import 'package:quick_bites/Data/Api/api.dart';
 import 'package:quick_bites/core/routs/routs.dart';
 import 'package:quick_bites/core/utils/dialog_helper.dart';
 import 'package:quick_bites/widgets/custom_message_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SingupController extends GetxController {
   final usernameController = TextEditingController();
@@ -49,66 +50,7 @@ class SingupController extends GetxController {
     isPasswordVisible.value = !isPasswordVisible.value;
   }
 
-  // void singup(BuildContext context) async {
-  //   // Do login logic
-  //   try {
-  //     var url = Uri.parse(ApiDetails.singupApi);
-
-  //     http.Response result = await http.post(
-  //       url,
-  //       headers: {'Content-Type': 'application/json'},
-  //       body: jsonEncode({
-  //         'username': usernameController.text,
-  //         'email': emailController.text,
-  //         'password': passwordController.text,
-  //       }),
-  //     );
-
-  //     final data = jsonDecode(result.body);
-  //     if (result.statusCode == 200) {
-  //       if (data['message'] == "Email already registered") {
-  //         showCustomMessageDialog(
-  //           context,
-  //           message: data['message'],
-  //           type: MessageType.error,
-  //         );
-  //       }else if (data['message'] == "Signup successful") {
-  //         showCustomMessageDialog(
-  //           context,
-  //           message: data['message'],
-  //           type: MessageType.success,
-  //         );
-  //         Future.delayed(Duration(seconds: 2), () {
-  //           Navigator.pushNamedAndRemoveUntil(
-  //             context,
-  //             AppRoutes.home,
-  //             (route) => false,
-  //           );
-  //         });
-  //       } else {
-  //         showCustomMessageDialog(
-  //           context,
-  //           message: data['message'],
-  //           type: MessageType.error,
-  //         );
-  //       }
-  //     } else {
-  //       showCustomMessageDialog(
-  //         context,
-  //         message: data['message'],
-  //         type: MessageType.error,
-  //       );
-  //       // print(data['message'] ?? 'An unexpected error occurred');
-  //     }
-  //   } catch (e) {
-  //     showCustomMessageDialog(
-  //       context,
-  //       message: "Connection Error $e",
-  //       type: MessageType.error,
-  //     );
-  //   }
-  // }
-  void signup(BuildContext context) async {
+  void signup2(BuildContext context) async {
     try {
       var url = Uri.parse(ApiDetails.singupApi);
 
@@ -168,6 +110,68 @@ class SingupController extends GetxController {
     }
   }
 
+
+  void signup(BuildContext context) async {
+  // Show a loading indicator to the user while the request is in progress.
+
+
+  final Map<String, dynamic> responseData = await ApiService.request(
+    url: ApiDetails.singupApi,
+    method: "POST",
+    body: {
+      'name': usernameController.text,
+      'email': emailController.text,
+      'password': passwordController.text,
+    },
+  );
+
+  
+
+  if (responseData.containsKey('error') && responseData['error'] == true) {
+    
+    showCustomMessageDialog(
+      context,
+      message: responseData['message'] ?? 'An unknown network error occurred.',
+      type: MessageType.error,
+    );
+    
+    return;
+  }
+
+  // Handle the successful API response based on the 'message' field from the server.
+  final String message = responseData['message'] ?? 'An unexpected server response.';
+  if (message == "Signup successful") {
+    showCustomMessageDialog(
+      context,
+      message: message,
+      type: MessageType.success,
+    );
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool("IsLogin", true);
+    
+    Future.delayed(Duration(seconds: 2), () {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.home,
+        (route) => false,
+      );
+    });
+  } else if (message == "Email already registered") {
+    showCustomMessageDialog(
+      context,
+      message: message,
+      type: MessageType.info,
+    );
+  } else {
+    // Catch any other messages from the server.
+    showCustomMessageDialog(
+      context,
+      message: message,
+      type: MessageType.error,
+    );
+  }
+}
+  
   @override
   void onClose() {
     usernameController.dispose();

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
+// import 'package:lottie/lottie.dart';
 
 import 'package:quick_bites/modules/auth/Controller/forgetPassword_controller.dart';
 import 'package:quick_bites/widgets/custom_button.dart';
@@ -29,7 +29,7 @@ class _ForgetPasswordState extends State<ForgetPassword> {
               key: formKey,
               child: Column(
                 children: [
-                  Lottie.asset("assets/animation/Burger.json",width: 210),
+                  // Lottie.asset("assets/animation/Burger.json",width: 210),
                 
                   const SizedBox(height: 15),
 

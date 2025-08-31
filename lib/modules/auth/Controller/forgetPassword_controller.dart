@@ -1,14 +1,12 @@
 // ignore_for_file: avoid_print, use_build_context_synchronously
 
-import 'dart:convert';
+
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'package:quick_bites/Data/Api/api.dart';
+
 import 'package:quick_bites/core/routs/routs.dart';
-import 'package:quick_bites/core/utils/dialog_helper.dart';
-import 'package:quick_bites/widgets/custom_message_dialog.dart';
+
 
 class ForgetpasswordController extends GetxController {
   final emialController = TextEditingController();

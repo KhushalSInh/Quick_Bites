@@ -1,10 +1,10 @@
-// ignore_for_file: avoid_print, use_build_context_synchronously
+// ignore_for_file: avoid_print, use_build_context_synchronously, non_constant_identifier_names, unused_local_variable
 
-import 'dart:convert';
+
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
+
 import 'package:quick_bites/Data/Api/api.dart';
 import 'package:quick_bites/core/routs/routs.dart';
 import 'package:quick_bites/core/utils/dialog_helper.dart';
@@ -43,61 +43,114 @@ class LoginController extends GetxController {
     isPasswordVisible.value = !isPasswordVisible.value;
   }
 
-  void login(BuildContext context) async {
-    // Do login logic
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    try {
-      var url = Uri.parse(ApiDetails.loginApi);
 
-      http.Response result = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': emialController.text,
-          'password': passwordController.text,
-        }),
-      );
 
-      final data = jsonDecode(result.body);
-      if (result.statusCode == 200) {
-        if (data['message'] == "successful") {
-          showCustomMessageDialog(
-            context,
-            message: "Login sucessfully.",
-            type: MessageType.success,
-          );
-          prefs.setBool("IsLogin", true);
-          Future.delayed(Duration(seconds: 2), () {
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              AppRoutes.home,
-              (route) => false,
-            );
-          });
-        } else {
-          showCustomMessageDialog(
-            // "Login failed. Incorrect username or password."
-            context,
-            message: data['message'],
-            type: MessageType.error,
-          );
-        }
-      } else {
-        showCustomMessageDialog(
-          context,
-          message: data['message'],
-          type: MessageType.error,
-        );
-        print(data['message'] ?? 'An unexpected error occurred');
-      }
-    } catch (e) {
-      showCustomMessageDialog(
-        context,
-        message: "Connection Error $e",
-        type: MessageType.error,
-      );
-    }
+void login(BuildContext context) async {
+
+  final Map<String, dynamic> responseData = await ApiService.request(
+    url: ApiDetails.loginApi,
+    method: "POST",
+    body: {
+      'email': emialController.text,
+      'password': passwordController.text,
+    },
+  );
+
+
+  if (responseData.containsKey('error') && responseData['error'] == true) {
+    // This block handles all types of errors (network, server status codes > 299)
+    showCustomMessageDialog(
+      context,
+      message: responseData['message'] ?? 'An unknown network error occurred.',
+      type: MessageType.error,
+    );
+    print(responseData['message']);
+    return;
   }
+
+  // Handle successful API response with the "message" field from the server
+  if (responseData['message'] == "successful") {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool("IsLogin", true);
+
+    showCustomMessageDialog(
+      context,
+      message: "Login successful.",
+      type: MessageType.success,
+    );
+
+    Future.delayed(Duration(seconds: 2), () {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.home,
+        (route) => false,
+      );
+    });
+  } else {
+    // This handles the server-side logic of "Invalid credentials"
+    showCustomMessageDialog(
+      context,
+      message: responseData['message'] ?? 'Login failed.',
+      type: MessageType.error,
+    );
+  }
+}
+  
+  // void login(BuildContext context) async {
+  //   // Do login logic
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   try {
+  //     var url = Uri.parse(ApiDetails.loginApi);
+
+  //     http.Response result = await http.post(
+  //       url,
+  //       headers: {'Content-Type': 'application/json'},
+  //       body: jsonEncode({
+  //         'email': emialController.text,
+  //         'password': passwordController.text,
+  //       }),
+  //     );
+
+  //     final data = jsonDecode(result.body);
+  //     if (result.statusCode == 200) {
+  //       if (data['message'] == "successful") {
+  //         showCustomMessageDialog(
+  //           context,
+  //           message: "Login sucessfully.",
+  //           type: MessageType.success,
+  //         );
+  //         prefs.setBool("IsLogin", true);
+  //         Future.delayed(Duration(seconds: 2), () {
+  //           Navigator.pushNamedAndRemoveUntil(
+  //             context,
+  //             AppRoutes.home,
+  //             (route) => false,
+  //           );
+  //         });
+  //       } else {
+  //         showCustomMessageDialog(
+  //           // "Login failed. Incorrect username or password."
+  //           context,
+  //           message: data['message'],
+  //           type: MessageType.error,
+  //         );
+  //       }
+  //     } else {
+  //       showCustomMessageDialog(
+  //         context,
+  //         message: data['message'],
+  //         type: MessageType.error,
+  //       );
+  //       print(data['message'] ?? 'An unexpected error occurred');
+  //     }
+  //   } catch (e) {
+  //     showCustomMessageDialog(
+  //       context,
+  //       message: "Connection Error $e",
+  //       type: MessageType.error,
+  //     );
+  //   }
+  // }
 
   void skipLogin(BuildContext context) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -106,16 +159,16 @@ class LoginController extends GetxController {
 
     if (isLogin == true) {
       Navigator.pushNamedAndRemoveUntil(
-              context,
-              AppRoutes.home,
-              (route) => false,
-            );
+        context,
+        AppRoutes.home,
+        (route) => false,
+      );
     } else {
       Navigator.pushNamedAndRemoveUntil(
-              context,
-              AppRoutes.welcome,
-              (route) => false,
-            );
+        context,
+        AppRoutes.welcome,
+        (route) => false,
+      );
     }
   }
 

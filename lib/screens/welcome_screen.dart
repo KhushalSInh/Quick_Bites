@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:quick_bites/modules/auth/screens/signup_screen.dart';
-import '../modules/auth/screens/login_screen.dart';
+import 'package:quick_bites/core/routs/routs.dart';
 
 
 
@@ -64,7 +63,7 @@ class WelcomeScreen extends StatelessWidget {
                         ),
                       ),
                       onPressed: () {
-                        // TODO: Add Get started logic
+                        
                       },
                       child: const Text(
                         'Get started',
@@ -86,10 +85,7 @@ class WelcomeScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(5),
                             ),
                           ),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => SignUpScreen()),
-                          ),
+                          onPressed: () => Navigator.pushNamed(context, AppRoutes.SignupAuth),
                           child: const Text(
                             'Signup',
                             style: TextStyle(color: Colors.white, fontSize: 16),
@@ -107,10 +103,7 @@ class WelcomeScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(5),
                             ),
                           ),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => LoginScreen()),
-                          ),
+                          onPressed: () => Navigator.pushNamed(context, AppRoutes.LoginAuth),
                           child: const Text(
                             'Login',
                             style: TextStyle(color: Colors.white, fontSize: 16),

@@ -1,0 +1,12 @@
+flutter:
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/images/1.png # Be sure your image is listed here
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/images/1.png
+  android: true
+  ios: true
