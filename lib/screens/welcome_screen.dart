@@ -103,7 +103,7 @@ class WelcomeScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(5),
                             ),
                           ),
-                          onPressed: () => Navigator.pushNamed(context, AppRoutes.LoginAuth),
+                          onPressed: () => Navigator.pushNamed(context, AppRoutes.ChangePassAuth),
                           child: const Text(
                             'Login',
                             style: TextStyle(color: Colors.white, fontSize: 16),

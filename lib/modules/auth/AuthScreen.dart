@@ -1,12 +1,19 @@
+// ignore: duplicate_ignore
+// ignore: file_names
 
+
+// ignore_for_file: file_names, duplicate_ignore
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quick_bites/modules/auth/AuthFroms.dart';
+import 'package:quick_bites/modules/auth/Controller/forgetPassword_controller.dart';
 import 'package:quick_bites/modules/auth/Controller/login_controller.dart';
+import 'package:quick_bites/modules/auth/Controller/otp_controller.dart';
 import 'package:quick_bites/modules/auth/Controller/singup_controller.dart';
 
-enum AuthMode { login, signup, forgot }
+
+enum AuthMode { login, signup, forgot, otp ,changePass }
 
 class AuthScreen extends StatefulWidget {
   final AuthMode mode; 
@@ -24,8 +31,10 @@ class _AuthScreenState extends State<AuthScreen> {
 
   // ignore: non_constant_identifier_names
   final SingupCtrl = Get.put(SingupController());
-
   final loginCtrl = Get.put(LoginController());
+  final OtpController otpController = Get.put(OtpController(otpLength: 4));
+  final  forgetCtrl  = Get.put(ForgetpasswordController());
+
   bool isVisible = false;
   //Here is our bool variable
   bool isLoginTrue = false;
@@ -44,9 +53,12 @@ class _AuthScreenState extends State<AuthScreen> {
         return "Sign Up";
       case AuthMode.forgot:
         return "Forgot Password";
+      case AuthMode.otp:
+         return "OTP Verification";
+      case AuthMode.changePass:
+          return "Change Password";
     }
   }
-
   // 📝 Dynamic Subtitle
   String get _subtitle {
     switch (_authMode) {
@@ -56,6 +68,10 @@ class _AuthScreenState extends State<AuthScreen> {
         return "Create your account";
       case AuthMode.forgot:
         return "Reset your password here";
+      case AuthMode.otp:
+         return "Please enter the OTP sent to your email";
+      case AuthMode.changePass:
+          return "Set your new password";
     }
   }
 
@@ -77,8 +93,23 @@ class _AuthScreenState extends State<AuthScreen> {
           context: context,
         );
       case AuthMode.forgot:
-        
-        throw UnimplementedError();
+        return AuthForms.forgetPassword(
+          formKey: formKey,
+          forgetCtrl: forgetCtrl,
+          context: context,
+        );
+      case AuthMode.otp:
+          return AuthForms.otpFillUpForm(
+            formKey: formKey,
+            otpController: otpController,
+            context: context,
+          );
+    case AuthMode.changePass:
+      return AuthForms.changePasswordForm(
+        formKey: formKey,
+        loginCtrl: loginCtrl,
+        context: context,
+      );
     }
   }
 

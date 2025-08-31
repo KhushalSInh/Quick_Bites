@@ -96,61 +96,7 @@ void login(BuildContext context) async {
   }
 }
   
-  // void login(BuildContext context) async {
-  //   // Do login logic
-  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   try {
-  //     var url = Uri.parse(ApiDetails.loginApi);
 
-  //     http.Response result = await http.post(
-  //       url,
-  //       headers: {'Content-Type': 'application/json'},
-  //       body: jsonEncode({
-  //         'email': emialController.text,
-  //         'password': passwordController.text,
-  //       }),
-  //     );
-
-  //     final data = jsonDecode(result.body);
-  //     if (result.statusCode == 200) {
-  //       if (data['message'] == "successful") {
-  //         showCustomMessageDialog(
-  //           context,
-  //           message: "Login sucessfully.",
-  //           type: MessageType.success,
-  //         );
-  //         prefs.setBool("IsLogin", true);
-  //         Future.delayed(Duration(seconds: 2), () {
-  //           Navigator.pushNamedAndRemoveUntil(
-  //             context,
-  //             AppRoutes.home,
-  //             (route) => false,
-  //           );
-  //         });
-  //       } else {
-  //         showCustomMessageDialog(
-  //           // "Login failed. Incorrect username or password."
-  //           context,
-  //           message: data['message'],
-  //           type: MessageType.error,
-  //         );
-  //       }
-  //     } else {
-  //       showCustomMessageDialog(
-  //         context,
-  //         message: data['message'],
-  //         type: MessageType.error,
-  //       );
-  //       print(data['message'] ?? 'An unexpected error occurred');
-  //     }
-  //   } catch (e) {
-  //     showCustomMessageDialog(
-  //       context,
-  //       message: "Connection Error $e",
-  //       type: MessageType.error,
-  //     );
-  //   }
-  // }
 
   void skipLogin(BuildContext context) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();

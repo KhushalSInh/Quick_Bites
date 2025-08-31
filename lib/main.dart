@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quick_bites/modules/auth/AuthScreen.dart';
-import 'package:quick_bites/modules/auth/screens/fill_otp.dart';
-import 'package:quick_bites/modules/auth/screens/forget_password.dart';
+
 import 'modules/home/Home_Screen.dart';
 import 'screens/welcome_screen.dart';
 import 'core/routs/routs.dart';
@@ -24,10 +23,11 @@ class MyApp extends StatelessWidget {
        routes: {
         AppRoutes.home: (context) => const HomeScreen(),
         AppRoutes.welcome: (context) => const WelcomeScreen(),
-        AppRoutes.forgetPassword: (context) => const ForgetPassword(),
-        AppRoutes.fillOtp: (context) => const OtpScreen(),
         AppRoutes.LoginAuth: (context) => AuthScreen(mode: AuthMode.login), 
         AppRoutes.SignupAuth: (context) => AuthScreen(mode: AuthMode.signup), 
+        AppRoutes.ForgotAuth: (context) => AuthScreen(mode: AuthMode.forgot), 
+        AppRoutes.OtpFillAuth: (context) => AuthScreen(mode: AuthMode.otp),
+        AppRoutes.ChangePassAuth: (context) => AuthScreen(mode: AuthMode.changePass),
       },
     );
     

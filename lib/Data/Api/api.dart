@@ -6,10 +6,11 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 
 class ApiDetails {
-  static String ip = "10.143.142.123";
+  static String ip = "192.168.0.160";
 
   static String get loginApi => "http://$ip/quickbites/login.php";
   static String get singupApi => "http://$ip/quickbites/singup.php";
+  static String get forgetPassword => "http://$ip/quickbites/sendOtp.php";
 }
 
 
