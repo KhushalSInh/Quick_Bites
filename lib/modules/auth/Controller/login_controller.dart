@@ -80,11 +80,14 @@ void login(BuildContext context) async {
     );
 
     Future.delayed(Duration(seconds: 2), () {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.home,
-        (route) => false,
-      );
+      // Navigator.pushNamedAndRemoveUntil(
+      //   context,
+      //   AppRoutes.home,
+      //   (route) => false,
+      // );
+      Navigator.pushReplacementNamed(context, AppRoutes.mainLayout);
+    
+
     });
   } else {
     // This handles the server-side logic of "Invalid credentials"

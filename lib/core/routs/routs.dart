@@ -9,5 +9,6 @@ class AppRoutes {
   static const ForgotAuth = '/authForgot';
   static const OtpFillAuth = '/otpFillAuth';
   static const ChangePassAuth = '/ChengePassAuth';
+  static const mainLayout = '/mainLayout'; // New route for MainLayout
 
 }
