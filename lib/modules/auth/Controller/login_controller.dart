@@ -72,7 +72,8 @@ void login(BuildContext context) async {
   if (responseData['message'] == "successful") {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool("IsLogin", true);
-
+    prefs.setInt("user_id", responseData['id']);
+    
     showCustomMessageDialog(
       context,
       message: "Login successful.",

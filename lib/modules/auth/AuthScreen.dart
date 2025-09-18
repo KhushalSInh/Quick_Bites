@@ -7,6 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quick_bites/modules/auth/AuthFroms.dart';
+import 'package:quick_bites/modules/auth/Controller/changePassword.dart';
 import 'package:quick_bites/modules/auth/Controller/forgetPassword_controller.dart';
 import 'package:quick_bites/modules/auth/Controller/login_controller.dart';
 import 'package:quick_bites/modules/auth/Controller/otp_controller.dart';
@@ -32,6 +33,7 @@ class _AuthScreenState extends State<AuthScreen> {
   // ignore: non_constant_identifier_names
   final SingupCtrl = Get.put(SingupController());
   final loginCtrl = Get.put(LoginController());
+  final ChangePassCtrl = Get.put(ChangePasswordController());
   final OtpController otpController = Get.put(OtpController(otpLength: 4));
   final  forgetCtrl  = Get.put(ForgetpasswordController());
 
@@ -107,7 +109,7 @@ class _AuthScreenState extends State<AuthScreen> {
     case AuthMode.changePass:
       return AuthForms.changePasswordForm(
         formKey: formKey,
-        loginCtrl: loginCtrl,
+        ChangePassCtrl: ChangePassCtrl,
         context: context,
       );
     }

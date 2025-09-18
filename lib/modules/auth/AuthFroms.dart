@@ -1,9 +1,10 @@
-// ignore_for_file: file_names, no_leading_underscores_for_local_identifiers
+// ignore_for_file: file_names, no_leading_underscores_for_local_identifiers, non_constant_identifier_names
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:quick_bites/core/routs/routs.dart';
+import 'package:quick_bites/modules/auth/Controller/changePassword.dart';
 import 'package:quick_bites/modules/auth/Controller/forgetPassword_controller.dart';
 import 'package:quick_bites/modules/auth/Controller/login_controller.dart';
 import 'package:quick_bites/modules/auth/Controller/otp_controller.dart';
@@ -288,7 +289,7 @@ class AuthForms {
   /// ---------------- CHANGEPASS FORM ----------------
   static Widget changePasswordForm({
     required GlobalKey<FormState> formKey,
-    required LoginController loginCtrl,
+    required ChangePasswordController ChangePassCtrl,
     required BuildContext context,
     // required bool isLoginTrue,
   }) {
@@ -301,31 +302,31 @@ class AuthForms {
         children: [
           Obx(
             () => CustomInputField(
-              controller: loginCtrl.passwordController,
+              controller: ChangePassCtrl.newPasswordController,
               hintText: "New Password",
               prefixIcon: Icons.lock,
-              obscureText: !loginCtrl.isPasswordVisible.value,
+              obscureText: !ChangePassCtrl.isPasswordVisible.value,
               showSuffixIcon: true,
-              suffixIcon: loginCtrl.isPasswordVisible.value
+              suffixIcon: ChangePassCtrl.isPasswordVisible.value
                   ? Icons.visibility
                   : Icons.visibility_off,
-              onSuffixTap: loginCtrl.togglePasswordVisibility,
-              validator: loginCtrl.validatePassword,
+              onSuffixTap: ChangePassCtrl.togglePasswordVisibility,
+              validator: ChangePassCtrl.validatePassword,
             ),
           ),
 
           Obx(
             () => CustomInputField(
-              controller: loginCtrl.passwordController,
+              controller: ChangePassCtrl.confirmNewPasswordController,
               hintText: "Confirm Password",
               prefixIcon: Icons.lock,
-              obscureText: !loginCtrl.isPasswordVisible.value,
+              obscureText: !ChangePassCtrl.isPasswordVisible.value,
               showSuffixIcon: true,
-              suffixIcon: loginCtrl.isPasswordVisible.value
+              suffixIcon: ChangePassCtrl.isPasswordVisible.value
                   ? Icons.visibility
                   : Icons.visibility_off,
-              onSuffixTap: loginCtrl.togglePasswordVisibility,
-              validator: loginCtrl.validatePassword,
+              onSuffixTap: ChangePassCtrl.togglePasswordVisibility,
+              validator: ChangePassCtrl.validatePassword,
             ),
           ),
 
@@ -335,7 +336,7 @@ class AuthForms {
             label: "Change Password",
             onPressed: () {
               if (formKey.currentState!.validate()) {
-                loginCtrl.login(context);
+                ChangePassCtrl.changePassword(context);
               }
             },
           ),

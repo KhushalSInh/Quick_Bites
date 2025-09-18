@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart'; // for nice icons
 
@@ -40,12 +42,11 @@ class ProfileScreen extends StatelessWidget {
               children: const [
                 CircleAvatar(
                   radius: 40,
-                  backgroundImage: NetworkImage(
-                      "https://randomuser.me/api/portraits/men/32.jpg"), // replace with real user
+                  backgroundImage:  AssetImage("assets/images/user.png")// replace with real user
                 ),
                 SizedBox(height: 10),
                 Text(
-                  "Vishal Khadok",
+                  "User Name",
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -79,7 +80,6 @@ class ProfileScreen extends StatelessWidget {
 
             // Third Card
             _buildCard([
-              _buildMenuItem(icon: LucideIcons.helpCircle, title: "FAQs"),
               _buildMenuItem(icon: LucideIcons.star, title: "User Reviews"),
               _buildMenuItem(icon: LucideIcons.settings, title: "Settings"),
             ]),

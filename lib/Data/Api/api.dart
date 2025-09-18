@@ -11,6 +11,7 @@ class ApiDetails {
   static String get loginApi => "http://$ip/quickbites/login.php";
   static String get singupApi => "http://$ip/quickbites/singup.php";
   static String get forgetPassword => "http://$ip/quickbites/sendOtp.php";
+  static String get changePasswordApi => "http://$ip/quickbites/Change_password.php";
 }
 
 
