@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:quick_bites/modules/auth/AuthScreen.dart';
 import 'package:quick_bites/modules/home/MainLayout.dart';
-
 // import 'modules/home/Home_Screen.dart';
 import 'screens/welcome_screen.dart';
 import 'core/routs/routs.dart';
-
-
-
 
 void main() => runApp(MyApp());
 
