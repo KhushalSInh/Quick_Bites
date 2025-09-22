@@ -58,6 +58,7 @@ class OtpController extends GetxController {
     Future<String?> otp2 = getStoredOTP() ;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? otp = await otp2;
+    
     if (userotp.compareTo(otp!) == 0) {
       showCustomMessageDialog(
         context,
