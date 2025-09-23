@@ -37,3 +37,11 @@ flutter:
       fonts:
         - asset: assets/fonts/Pacifico-Regular.ttf
           weight: 900
+
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path_android: "assets/images/qb.png"
+  adaptive_icon_background: "#ffffff"
+  # adaptive_icon_foreground: "assets/icon_foreground.png"

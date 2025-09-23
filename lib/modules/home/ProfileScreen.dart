@@ -1,17 +1,22 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart'; // for nice icons
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:quick_bites/modules/home/FormScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:quick_bites/core/routs/routs.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  Widget _buildMenuItem(
-      {required IconData icon,
-      required String title,
-      VoidCallback? onTap}) {
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String title,
+    VoidCallback? onTap,
+    Color? color,
+  }) {
     return ListTile(
-      leading: Icon(icon, color: Colors.deepPurple),
+      leading: Icon(icon, color: color ?? Colors.deepPurple),
       title: Text(title, style: const TextStyle(fontSize: 16)),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: onTap,
@@ -28,6 +33,19 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs
+        .remove("IsLogin"); // or prefs.clear() if you want to clear everything
+    await prefs.remove("user_id");
+    // Navigate back to welcome/login screen and remove previous routes
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      AppRoutes.LoginAuth,
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,9 +59,8 @@ class ProfileScreen extends StatelessWidget {
             Column(
               children: const [
                 CircleAvatar(
-                  radius: 40,
-                  backgroundImage:  AssetImage("assets/images/user.png")// replace with real user
-                ),
+                    radius: 40,
+                    backgroundImage: AssetImage("assets/images/user.png")),
                 SizedBox(height: 10),
                 Text(
                   "User Name",
@@ -63,8 +80,23 @@ class ProfileScreen extends StatelessWidget {
 
             // First Card
             _buildCard([
+              // Example inside _buildMenuItem onTap:
               _buildMenuItem(
-                  icon: LucideIcons.user, title: "Personal Info", onTap: () {}),
+                icon: LucideIcons.user,
+                title: "Personal Info",
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FormScreen(
+                        title: "Personal Info",
+                        mode: FormMode.personalInfo,
+                      ),
+                    ),
+                  );
+                },
+              ),
+
               _buildMenuItem(
                   icon: LucideIcons.mapPin, title: "Addresses", onTap: () {}),
             ]),
@@ -82,6 +114,16 @@ class ProfileScreen extends StatelessWidget {
             _buildCard([
               _buildMenuItem(icon: LucideIcons.star, title: "User Reviews"),
               _buildMenuItem(icon: LucideIcons.settings, title: "Settings"),
+            ]),
+
+            // Logout Card (Separate & Highlighted)
+            _buildCard([
+              _buildMenuItem(
+                icon: LucideIcons.logOut,
+                title: "Logout",
+                color: Colors.red, // Make it stand out
+                onTap: () => _logout(context),
+              ),
             ]),
 
             const SizedBox(height: 20),

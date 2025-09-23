@@ -13,7 +13,6 @@ class OtpController extends GetxController {
   late List<TextEditingController> controllers;
   late List<FocusNode> focusNodes;
 
-  // Reactive variables
   var start = 30.obs;
   var isResendAvailable = false.obs;
   Timer? _resendTimer;
@@ -28,7 +27,6 @@ class OtpController extends GetxController {
     _startResendTimer();
   }
 
-  // Handle OTP typing
   void onOtpChange(String value, int index, BuildContext context) {
     if (value.length == 1 && index < otpLength - 1) {
       focusNodes[index + 1].requestFocus();
@@ -41,33 +39,30 @@ class OtpController extends GetxController {
     }
   }
 
-  // Get final OTP
   String getOtp() {
     return controllers.map((c) => c.text).join();
   }
 
   Future<String?> getStoredOTP() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? otp = prefs.getString('user_otp');
-    return otp;
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('user_otp');
   }
 
-  // Submit OTP
-  void submitOtp(BuildContext context) async {
-    String userotp = getOtp();
-    Future<String?> otp2 = getStoredOTP() ;
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? otp = await otp2;
-    
-    if (userotp.compareTo(otp!) == 0) {
+  Future<void> submitOtp(BuildContext context) async {
+    final userOtp = getOtp();
+    final prefs = await SharedPreferences.getInstance();
+    final otp = await getStoredOTP();
+
+    if (!context.mounted) return; // <--- prevents crash
+
+    if (otp != null && userOtp == otp) {
       showCustomMessageDialog(
         context,
         message: "OTP Verified Successfully",
         type: MessageType.success,
       );
-      
-      prefs.remove('user_otp');  // unset otp after successful verification
-      prefs.remove('user_email'); // unset email after successful verification
+      prefs.remove('user_otp');
+      prefs.remove('user_email');
     } else {
       showCustomMessageDialog(
         context,
@@ -77,37 +72,36 @@ class OtpController extends GetxController {
     }
   }
 
-  // Resend OTP
-  void handleResend(BuildContext context) async{
-    if (isResendAvailable.value) {
-       
+  Future<void> handleResend(BuildContext context) async {
+    if (!isResendAvailable.value) return;
 
-      final pasw = Get.put(ForgetpasswordController());
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? email = prefs.getString('user_email');
+    final pasw = Get.put(ForgetpasswordController());
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('user_email');
 
-      pasw.sendEmial(context, email: email.toString());
+    
+    pasw.sendEmial(context, email: email.toString());
 
-      showCustomMessageDialog(
-        context,
-        message: "OTP Send Successfully",
-        type: MessageType.success,
-      );
+    if (!context.mounted) return; // <--- prevents crash
 
-      for (var c in controllers) {
-        c.clear();
-      }
-      focusNodes[0].requestFocus();
-      _startResendTimer();
+    showCustomMessageDialog(
+      context,
+      message: "OTP Sent Successfully",
+      type: MessageType.success,
+    );
+
+    for (var c in controllers) {
+      c.clear();
     }
+    focusNodes[0].requestFocus();
+    _startResendTimer();
   }
 
-  // Timer
   void _startResendTimer() {
     isResendAvailable.value = false;
     start.value = 30;
-
     _resendTimer?.cancel();
+
     _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (start.value == 0) {
         isResendAvailable.value = true;
