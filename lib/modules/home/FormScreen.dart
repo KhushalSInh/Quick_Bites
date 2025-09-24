@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+// import 'package:quick_bites/core/routs/routs.dart';
 import 'package:quick_bites/modules/home/UserAppForms.dart';
 enum FormMode {
   personalInfo,
@@ -16,7 +16,7 @@ enum FormMode {
 class FormScreen extends StatelessWidget {
   final FormMode mode;
 
-  const FormScreen({super.key, required this.mode, required String title, Widget? formWidget});
+  const FormScreen({super.key, required this.mode, required String title});
 
   Widget _buildFormContent() {
     switch (mode) {

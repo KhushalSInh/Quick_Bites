@@ -30,7 +30,7 @@ flutter:
 
   assets:
     - assets/images/
-    - assets/animation/
+    
 
   fonts:
     - family: Screen

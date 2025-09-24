@@ -35,8 +35,7 @@ class ProfileScreen extends StatelessWidget {
 
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs
-        .remove("IsLogin"); // or prefs.clear() if you want to clear everything
+    await prefs.remove("IsLogin"); // or prefs.clear() if you want to clear everything
     await prefs.remove("user_id");
     // Navigate back to welcome/login screen and remove previous routes
     Navigator.pushNamedAndRemoveUntil(

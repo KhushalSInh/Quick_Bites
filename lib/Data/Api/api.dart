@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 
 class ApiDetails {
-  static String ip = "10.227.34.123";
+  static String ip = "10.73.58.123";
 
   static String get loginApi => "http://$ip/quickbites/login.php";
   static String get singupApi => "http://$ip/quickbites/singup.php";
