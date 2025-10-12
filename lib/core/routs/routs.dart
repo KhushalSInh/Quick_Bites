@@ -1,5 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
+
+
 class AppRoutes {
   static const welcome = '/welcome';
   static const home = '/home';
@@ -12,6 +14,7 @@ class AppRoutes {
   static const mainLayout = '/mainLayout'; // New route for MainLayout
 
   static const UserAppForms = '/UserAppForms'; // New route for UserAppForms
+  static const Address = '/address'; // New route for Address
   
 
 

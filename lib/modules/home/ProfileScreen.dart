@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, use_build_context_synchronously
+// ignore_for_file: fileNames, use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -12,120 +12,343 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildMenuItem({
     required IconData icon,
     required String title,
+    String? subtitle,
     VoidCallback? onTap,
-    Color? color,
+    Color? iconColor,
+    bool isLogout = false,
   }) {
-    return ListTile(
-      leading: Icon(icon, color: color ?? Colors.deepPurple),
-      title: Text(title, style: const TextStyle(fontSize: 16)),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: onTap,
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      child: ListTile(
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: isLogout 
+              ? Colors.red.withOpacity(0.1)
+              : Colors.orange.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            icon,
+            color: isLogout ? Colors.red : iconColor ?? Colors.orange,
+            size: 20,
+          ),
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: isLogout ? Colors.red : Colors.black87,
+          ),
+        ),
+        subtitle: subtitle != null ? Text(
+          subtitle,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+          ),
+        ) : null,
+        trailing: Container(
+          width: 30,
+          height: 30,
+          decoration: BoxDecoration(
+            color: Colors.grey.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            Icons.arrow_forward_ios,
+            size: 14,
+            color: isLogout ? Colors.red : Colors.grey,
+          ),
+        ),
+        onTap: onTap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
   }
 
-  Widget _buildCard(List<Widget> children) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      elevation: 0,
-      color: Colors.grey[100],
-      child: Column(children: children),
+  Widget _buildSection({
+    required String title,
+    required List<Widget> children,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+        Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          color: Colors.white,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(children: children),
+          ),
+        ),
+      ],
     );
   }
 
   Future<void> _logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove("IsLogin"); // or prefs.clear() if you want to clear everything
-    await prefs.remove("user_id");
-    // Navigate back to welcome/login screen and remove previous routes
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      AppRoutes.LoginAuth,
-      (route) => false,
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text(
+            "Logout",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text("Are you sure you want to logout?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.remove("IsLogin");
+                await prefs.remove("user_id");
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  AppRoutes.LoginAuth,
+                  (route) => false,
+                );
+              },
+              child: const Text(
+                "Logout",
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
-        child: ListView(
-          children: [
-            const SizedBox(height: 20),
-
-            // User Profile Section
-            Column(
-              children: const [
-                CircleAvatar(
-                    radius: 40,
-                    backgroundImage: AssetImage("assets/images/user.png")),
-                SizedBox(height: 10),
-                Text(
-                  "User Name",
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  "I love fast food",
-                  style: TextStyle(color: Colors.grey),
-                ),
-                SizedBox(height: 20),
-              ],
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  const SizedBox(height: 30),
+                  
+                  // User Profile Section
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFFFF6B35), Color(0xFFFF8E53)],
+                      ),
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.orange.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 3),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: const CircleAvatar(
+                            backgroundImage: AssetImage("assets/images/user.png"),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                "User Name",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                "I love fast food 🍔",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              LinearProgressIndicator(
+                                value: 0.7,
+                                backgroundColor: Colors.white30,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                borderRadius: BorderRadius.all(Radius.circular(10)),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                "Profile 70% complete",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            SliverToBoxAdapter(
+              child: _buildSection(
+                title: "Account",
+                children: [
+                  _buildMenuItem(
+                    icon: LucideIcons.user,
+                    title: "Personal Info",
+                    subtitle: "Update your personal details",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => FormScreen(
+                            title: "Personal Info",
+                            mode: FormMode.personalInfo,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  _buildMenuItem(
+                    icon: LucideIcons.mapPin,
+                    title: "Addresses",
+                    subtitle: "Manage your delivery addresses",
+                    onTap: () {
+                       Navigator.pushNamed(context, AppRoutes.Address);
+                    },
+                  ),
+                ],
+              ),
             ),
 
-            // First Card
-            _buildCard([
-              // Example inside _buildMenuItem onTap:
-              _buildMenuItem(
-                icon: LucideIcons.user,
-                title: "Personal Info",
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => FormScreen(
-                        title: "Personal Info",
-                        mode: FormMode.personalInfo,
-                      ),
-                    ),
-                  );
-                },
+            SliverToBoxAdapter(
+              child: _buildSection(
+                title: "Preferences",
+                children: [
+                  _buildMenuItem(
+                    icon: LucideIcons.shoppingCart,
+                    title: "Cart",
+                    subtitle: "3 items waiting",
+                  ),
+                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  _buildMenuItem(
+                    icon: LucideIcons.heart,
+                    title: "Favourite",
+                    subtitle: "12 liked items",
+                  ),
+                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  _buildMenuItem(
+                    icon: LucideIcons.bell,
+                    title: "Notifications",
+                    subtitle: "Manage notifications",
+                  ),
+                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  _buildMenuItem(
+                    icon: LucideIcons.creditCard,
+                    title: "Payment Method",
+                    subtitle: "2 cards added",
+                  ),
+                ],
               ),
+            ),
 
-              _buildMenuItem(
-                  icon: LucideIcons.mapPin, title: "Addresses", onTap: () {}),
-            ]),
-
-            // Second Card
-            _buildCard([
-              _buildMenuItem(icon: LucideIcons.shoppingCart, title: "Cart"),
-              _buildMenuItem(icon: LucideIcons.heart, title: "Favourite"),
-              _buildMenuItem(icon: LucideIcons.bell, title: "Notifications"),
-              _buildMenuItem(
-                  icon: LucideIcons.creditCard, title: "Payment Method"),
-            ]),
-
-            // Third Card
-            _buildCard([
-              _buildMenuItem(icon: LucideIcons.star, title: "User Reviews"),
-              _buildMenuItem(icon: LucideIcons.settings, title: "Settings"),
-            ]),
-
-            // Logout Card (Separate & Highlighted)
-            _buildCard([
-              _buildMenuItem(
-                icon: LucideIcons.logOut,
-                title: "Logout",
-                color: Colors.red, // Make it stand out
-                onTap: () => _logout(context),
+            SliverToBoxAdapter(
+              child: _buildSection(
+                title: "More",
+                children: [
+                  _buildMenuItem(
+                    icon: LucideIcons.star,
+                    title: "User Reviews",
+                    subtitle: "Your ratings and reviews",
+                  ),
+                  const Divider(height: 1, indent: 16, endIndent: 16),
+                  _buildMenuItem(
+                    icon: LucideIcons.settings,
+                    title: "Settings",
+                    subtitle: "App preferences",
+                  ),
+                ],
               ),
-            ]),
+            ),
 
-            const SizedBox(height: 20),
+            SliverToBoxAdapter(
+              child: _buildSection(
+                title: "",
+                children: [
+                  _buildMenuItem(
+                    icon: LucideIcons.logOut,
+                    title: "Logout",
+                    isLogout: true,
+                    onTap: () => _logout(context),
+                  ),
+                ],
+              ),
+            ),
+
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 30),
+            ),
           ],
         ),
       ),

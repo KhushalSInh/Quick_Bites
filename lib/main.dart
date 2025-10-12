@@ -1,12 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:quick_bites/Data/Api/AddModel.dart';
+import 'package:quick_bites/Data/Api/Model.dart' hide User;
+import 'package:quick_bites/modules/home/Address.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:quick_bites/modules/auth/AuthScreen.dart';
 import 'package:quick_bites/modules/home/MainLayout.dart';
 import 'screens/welcome_screen.dart';
 import 'core/routs/routs.dart';
 
-void main() => runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Hive.initFlutter();
+
+  Hive.registerAdapter(DataAdapter());
+  await Hive.openBox<Data>("itemsBox");
+
+  Hive.registerAdapter(UserAddAdapter());
+  await Hive.openBox<UserAdd>('userAddressBox');
+
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -45,6 +60,7 @@ class MyApp extends StatelessWidget {
         AppRoutes.OtpFillAuth: (context) => AuthScreen(mode: AuthMode.otp),
         AppRoutes.ChangePassAuth: (context) => AuthScreen(mode: AuthMode.changePass),
         AppRoutes.mainLayout: (context) => const MainLayout(),
+        AppRoutes.Address: (context) => const AddressScreen(),
         
       },
     );

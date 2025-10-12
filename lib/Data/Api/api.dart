@@ -1,17 +1,29 @@
-// ignore_for_file: unused_catch_clause
+// ignore_for_file: unused_catch_clause, avoid_print
 
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 
+
+
+
 class ApiDetails {
-  static String ip = "10.73.58.123";
+  static String ip = "10.116.39.123";
 
   static String get loginApi => "http://$ip/quickbites/login.php";
   static String get singupApi => "http://$ip/quickbites/singup.php";
   static String get forgetPassword => "http://$ip/quickbites/sendOtp.php";
   static String get changePasswordApi => "http://$ip/quickbites/Change_password.php";
+
+  static String get fooditems => "http://$ip/quickbites/Items.php";
+
+  static String get getAddress => "http://$ip/quickbites/GetAddress.php";
+  static String get addAddress => "http://$ip/quickbites/InsertAddress.php";
+  static String get updateAddress => "http://$ip/quickbites/UpdateAddress.php";
+  static String get deleteAddress => "http://$ip/quickbites/DeleteAddress.php";
+
+  
 }
 
 
@@ -121,4 +133,5 @@ class ApiService {
 
 //   print(response);
 // }
+ // adjust the path to your Data model
 

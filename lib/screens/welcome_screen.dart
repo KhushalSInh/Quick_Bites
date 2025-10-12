@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:quick_bites/Data/Api/Hive.dart';
 import 'package:quick_bites/core/routs/routs.dart';
 
-
-
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    DataManage.fetchFoodItems();
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final buttonWidth = size.width * 0.8; // 80% width for Get Started button
-    final smallButtonWidth = (size.width * 0.4) - 10; // for Signup/Login buttons
+    final smallButtonWidth =
+        (size.width * 0.4) - 10; // for Signup/Login buttons
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -62,7 +73,8 @@ class WelcomeScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(5),
                         ),
                       ),
-                      onPressed: () => Navigator.pushNamed(context, AppRoutes.mainLayout),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, AppRoutes.mainLayout),
                       child: const Text(
                         'Get started',
                         style: TextStyle(color: Colors.white, fontSize: 18),
@@ -83,7 +95,8 @@ class WelcomeScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(5),
                             ),
                           ),
-                          onPressed: () => Navigator.pushNamed(context, AppRoutes.SignupAuth),
+                          onPressed: () => Navigator.pushNamed(
+                              context, AppRoutes.SignupAuth),
                           child: const Text(
                             'Signup',
                             style: TextStyle(color: Colors.white, fontSize: 16),
@@ -101,7 +114,8 @@ class WelcomeScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(5),
                             ),
                           ),
-                          onPressed: () => Navigator.pushNamed(context, AppRoutes.LoginAuth),
+                          onPressed: () =>
+                              Navigator.pushNamed(context, AppRoutes.LoginAuth),
                           child: const Text(
                             'Login',
                             style: TextStyle(color: Colors.white, fontSize: 16),
