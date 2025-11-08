@@ -1,15 +1,15 @@
-flutter:
-  uses-material-design: true
+# flutter:
+#   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  assets:
-    - 
-    - assets/images/splash/lg.png 
+#   # To add assets to your application, add an assets section, like this:
+#   assets:
+#     - 
+#     - assets/images/splash/lg.png 
 
-flutter_native_splash:
+# flutter_native_splash:
   
-  background_image: assets/images/splash/lg.png
+#   background_image: assets/images/splash/lg.png
   
-  color: "#FFA500"
-  android: true
-  ios: true
+#   color: "#FFA500"
+#   android: true
+#   ios: true

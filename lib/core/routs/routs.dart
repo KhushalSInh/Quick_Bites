@@ -2,6 +2,8 @@
 
 
 
+import 'package:quick_bites/Data/Api/FavoriteModel.dart';
+
 class AppRoutes {
   static const welcome = '/welcome';
   static const home = '/home';
@@ -15,6 +17,9 @@ class AppRoutes {
 
   static const UserAppForms = '/UserAppForms'; // New route for UserAppForms
   static const Address = '/address'; // New route for Address
+
+  static const orderhistory = '/orderhistory';
+  static const Favorite = '/Favorite';
   
 
 

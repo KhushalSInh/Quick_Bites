@@ -1,7 +1,9 @@
-// ignore_for_file: non_constant_identifier_names, deprecated_member_use, sized_box_for_whitespace
-
+// FoodDetailScreen.dart
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive/hive.dart';
+import 'package:quick_bites/Data/Api/CartModel.dart';
+import 'package:quick_bites/Data/Api/FavoriteModel.dart';
+import 'package:quick_bites/Data/Api/Hive_Service.dart';
 import 'package:quick_bites/Data/Api/Model.dart';
 import 'package:quick_bites/Data/Api/api.dart';
 
@@ -17,7 +19,115 @@ class FoodDetailScreen extends StatefulWidget {
 class _FoodDetailScreenState extends State<FoodDetailScreen> {
   int quantity = 1;
   bool isFavorite = false;
+  bool _isCheckingFavorite = true;
+  late bool _initialFavoriteState;
 
+  @override
+  void initState() {
+    super.initState();
+    _initialFavoriteState = false;
+    _checkIfFavorite().then((_) {
+      _initialFavoriteState = isFavorite;
+    });
+  }
+
+  Future<void> _checkIfFavorite() async {
+    try {
+      final favoriteBox = await HiveService.getBox<FavoriteItem>('favoriteBox');
+      final currentFoodId = int.parse(widget.foodItem.itemId); // Parse to int
+
+      final isItemFavorite = favoriteBox.values.any(
+        (item) => item.foodId == currentFoodId, // Compare int with int
+      );
+
+      if (mounted) {
+        setState(() {
+          isFavorite = isItemFavorite;
+          _isCheckingFavorite = false;
+        });
+      }
+    } catch (e) {
+      print('Error checking favorite: $e');
+      if (mounted) {
+        setState(() {
+          isFavorite = false;
+          _isCheckingFavorite = false;
+        });
+      }
+    }
+  }
+void _toggleFavorite() async {
+  try {
+    final favoriteBox = await HiveService.getBox<FavoriteItem>('favoriteBox');
+    final existingItemKey = _findExistingFavoriteItem(favoriteBox);
+
+    if (existingItemKey != null) {
+      // Remove from favorites
+      await favoriteBox.delete(existingItemKey);
+      if (mounted) {
+        setState(() {
+          isFavorite = false;
+        });
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Removed ${widget.foodItem.name} from favorites'),
+          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    } else {
+      // Add to favorites - keep foodId as String
+      final favoriteItem = FavoriteItem(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        foodId: int.parse(widget.foodItem.itemId), // Keep as String
+        name: widget.foodItem.name,
+        description: widget.foodItem.description,
+        price: widget.foodItem.price,
+        image: widget.foodItem.img,
+        addedAt: DateTime.now(),
+      );
+      await favoriteBox.add(favoriteItem);
+      if (mounted) {
+        setState(() {
+          isFavorite = true;
+        });
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Added ${widget.foodItem.name} to favorites'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    }
+  } catch (e) {
+    print('Error toggling favorite: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error: Could not update favorites - $e'),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+}
+
+String? _findExistingFavoriteItem(Box<FavoriteItem> favoriteBox) {
+  for (var i = 0; i < favoriteBox.length; i++) {
+    final item = favoriteBox.getAt(i);
+    if (item?.foodId == widget.foodItem.itemId) { // String comparison
+      return favoriteBox.keyAt(i) as String;
+    }
+  }
+  return null;
+}
   @override
   Widget build(BuildContext context) {
     var ImageBase = ApiDetails.ip;
@@ -26,7 +136,6 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          // App Bar with Back Button
           SliverAppBar(
             expandedHeight: 300.0,
             floating: false,
@@ -42,7 +151,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
               child: IconButton(
                 icon: const Icon(Icons.arrow_back_rounded, color: Colors.black),
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.pop(context, isFavorite != _initialFavoriteState);
                 },
               ),
             ),
@@ -53,23 +162,29 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                   color: Colors.white.withOpacity(0.9),
                   shape: BoxShape.circle,
                 ),
-                child: IconButton(
-                  icon: Icon(
-                    isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                    color: isFavorite ? Colors.red : Colors.black,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      isFavorite = !isFavorite;
-                    });
-                  },
-                ),
+                child: _isCheckingFavorite
+                    ? const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : IconButton(
+                        icon: Icon(
+                          isFavorite
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          color: isFavorite ? Colors.red : Colors.black,
+                        ),
+                        onPressed: _toggleFavorite,
+                      ),
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 children: [
-                  // Food Image
                   Container(
                     width: double.infinity,
                     height: double.infinity,
@@ -113,7 +228,6 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                       },
                     ),
                   ),
-                  // Gradient Overlay
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -130,8 +244,6 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
               ),
             ),
           ),
-
-          // Food Details
           SliverToBoxAdapter(
             child: Container(
               padding: const EdgeInsets.all(24),
@@ -145,7 +257,6 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Food Name and Price
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,15 +283,12 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 16),
-
-                  // Rating and Category
                   Row(
                     children: [
-                      // Rating
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: Colors.orange.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
@@ -205,9 +313,9 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // Category
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: Colors.blue.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
@@ -223,10 +331,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 24),
-
-                  // Description Section
                   const Text(
                     "Description",
                     style: TextStyle(
@@ -237,8 +342,8 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    widget.foodItem.description?.isNotEmpty == true
-                        ? widget.foodItem.description!
+                    widget.foodItem.description.isNotEmpty == true
+                        ? widget.foodItem.description
                         : "Indulge in this delicious ${widget.foodItem.name}. Made with fresh ingredients and prepared with care, this dish is sure to satisfy your cravings. Perfect for any time of the day!",
                     style: TextStyle(
                       fontSize: 16,
@@ -246,10 +351,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                       height: 1.6,
                     ),
                   ),
-
                   const SizedBox(height: 32),
-
-                  // Ingredients Section
                   const Text(
                     "Ingredients",
                     style: TextStyle(
@@ -270,10 +372,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                       _buildIngredientChip("Secret Sauce"),
                     ],
                   ),
-
                   const SizedBox(height: 40),
-
-                  // Nutrition Facts
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -304,16 +403,13 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                       ],
                     ),
                   ),
-
-                  const SizedBox(height: 100), // Space for bottom button
+                  const SizedBox(height: 100),
                 ],
               ),
             ),
           ),
         ],
       ),
-
-      // Bottom Add to Cart Button
       bottomSheet: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -328,17 +424,15 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
         ),
         child: Row(
           children: [
-            // Quantity Selector
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.grey[50],
                 borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: Colors.grey[300] ?? Colors.grey),
+                border: Border.all(color: Colors.grey[300]!),
               ),
               child: Row(
                 children: [
-                  // Decrease Button
                   GestureDetector(
                     onTap: () {
                       if (quantity > 1) {
@@ -360,10 +454,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                       ),
                     ),
                   ),
-                  
                   const SizedBox(width: 16),
-                  
-                  // Quantity Display
                   Text(
                     quantity.toString(),
                     style: const TextStyle(
@@ -372,10 +463,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                       color: Colors.black87,
                     ),
                   ),
-                  
                   const SizedBox(width: 16),
-                  
-                  // Increase Button
                   GestureDetector(
                     onTap: () {
                       setState(() {
@@ -398,10 +486,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                 ],
               ),
             ),
-
             const SizedBox(width: 16),
-
-            // Add to Cart Button
             Expanded(
               child: ElevatedButton(
                 onPressed: () {
@@ -488,42 +573,65 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
     );
   }
 
-  void _addToCart(BuildContext context) {
-    // Add to cart logic here
-    final totalPrice = int.parse(widget.foodItem.price) * quantity;
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Added $quantity ${widget.foodItem.name} to cart - ₹$totalPrice',
-          style: const TextStyle(fontSize: 16),
-        ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
+  // Also update _addToCart method to ensure consistency:
+  void _addToCart(BuildContext context) async {
+    try {
+      final cartBox = await HiveService.getBox<CartItem>('cartBox');
+      final existingItemKey = _findExistingCartItem(cartBox);
+
+      if (existingItemKey != null) {
+        final existingItem = cartBox.get(existingItemKey);
+        if (existingItem != null) {
+          cartBox.put(
+              existingItemKey,
+              existingItem.copyWith(
+                  quantity: existingItem.quantity + quantity));
+        }
+      } else {
+        final cartItem = CartItem(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          foodId: widget.foodItem.itemId, // Keep as string for CartItem
+          name: widget.foodItem.name,
+          description: widget.foodItem.description,
+          price: widget.foodItem.price,
+          image: widget.foodItem.img,
+          quantity: quantity,
+          addedAt: DateTime.now(),
+        );
+        cartBox.add(cartItem);
+      }
+      // ... rest of _addToCart method
+    } catch (e) {
+      // ... error handling
+    }
   }
 
-  // Helper method to format image URL
+  String? _findExistingCartItem(Box<CartItem> cartBox) {
+    for (var i = 0; i < cartBox.length; i++) {
+      final item = cartBox.getAt(i);
+      if (item?.foodId == widget.foodItem.itemId) {
+        // Keep as string comparison
+        return cartBox.keyAt(i) as String;
+      }
+    }
+    return null;
+  }
+
   String _getImageUrl(String imagePath, String imageBase) {
     try {
       String cleanedPath = imagePath.replaceAll(r'\', '/');
-      
+
       if (cleanedPath.startsWith('http')) return cleanedPath;
-      
+
       while (cleanedPath.startsWith('/')) {
         cleanedPath = cleanedPath.substring(1);
       }
-      
+
       if (!cleanedPath.contains('quickbites')) {
         cleanedPath = 'quickbites/$cleanedPath';
       }
-      
+
       return 'http://$imageBase/$cleanedPath';
-      
     } catch (e) {
       return 'https://via.placeholder.com/400?text=No+Image';
     }

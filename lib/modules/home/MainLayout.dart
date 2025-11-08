@@ -22,7 +22,7 @@ class _MainLayoutState extends State<MainLayout> {
   final List<Widget> _pages = const [
     HomeScreen(),
     SearchScreen(),
-    OrdersScreen(),
+    CartScreen(),
     ProfileScreen(),
   ];
 
@@ -108,7 +108,7 @@ class _MainLayoutState extends State<MainLayout> {
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home, size: 28), label: "Home"),
             BottomNavigationBarItem(icon: Icon(Icons.search, size: 28), label: "Search"),
-            BottomNavigationBarItem(icon: Icon(Icons.calendar_today, size: 26), label: "Orders"),
+            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart, size: 26), label: "Orders"),
             BottomNavigationBarItem(icon: Icon(Icons.person, size: 28), label: "Profile"),
           ],
         ),

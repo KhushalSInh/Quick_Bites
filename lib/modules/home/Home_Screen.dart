@@ -6,7 +6,6 @@ import 'package:quick_bites/Data/Api/Hive.dart';
 import 'package:quick_bites/Data/Api/Model.dart';
 import 'package:quick_bites/Data/Api/api.dart';
 import 'package:quick_bites/modules/home/FoodDetails.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

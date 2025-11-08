@@ -1,8 +1,11 @@
+// ignore_for_file: avoid_print
+
+ // Add this
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/adapters.dart';
-import 'package:quick_bites/Data/Api/AddModel.dart';
-import 'package:quick_bites/Data/Api/Model.dart' hide User;
+import 'package:quick_bites/Data/Api/Hive_Service.dart'; // Add this
 import 'package:quick_bites/modules/home/Address.dart';
+import 'package:quick_bites/modules/home/FavoriteScreen.dart';
+import 'package:quick_bites/modules/home/OrderHistoryScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:quick_bites/modules/auth/AuthScreen.dart';
 import 'package:quick_bites/modules/home/MainLayout.dart';
@@ -12,23 +15,34 @@ import 'core/routs/routs.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Hive.initFlutter();
-
-  Hive.registerAdapter(DataAdapter());
-  await Hive.openBox<Data>("itemsBox");
-
-  Hive.registerAdapter(UserAddAdapter());
-  await Hive.openBox<UserAdd>('userAddressBox');
-
-  runApp(MyApp());
+  try {
+    await HiveService.initHive();
+    runApp(const MyApp());
+  } catch (e) {
+    print('Hive initialization error: $e');
+    runApp(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Text('Initialization Error: $e'),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   Future<bool> _checkLoginStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool("IsLogin") ?? false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool("IsLogin") ?? false;
+    } catch (e) {
+      print('SharedPreferences error: $e');
+      return false;
+    }
   }
 
   @override
@@ -42,6 +56,14 @@ class MyApp extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          if (snapshot.hasError) {
+            return Scaffold(
+              body: Center(
+                child: Text('Error: ${snapshot.error}'),
+              ),
             );
           }
 
@@ -61,7 +83,8 @@ class MyApp extends StatelessWidget {
         AppRoutes.ChangePassAuth: (context) => AuthScreen(mode: AuthMode.changePass),
         AppRoutes.mainLayout: (context) => const MainLayout(),
         AppRoutes.Address: (context) => const AddressScreen(),
-        
+        AppRoutes.orderhistory: (context) => const OrderHistoryScreen(),
+        AppRoutes.Favorite: (context) => const FavoriteScreen(),
       },
     );
   }

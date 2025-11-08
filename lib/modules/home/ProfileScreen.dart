@@ -159,95 +159,95 @@ class ProfileScreen extends StatelessWidget {
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  const SizedBox(height: 30),
+            // SliverToBoxAdapter(
+            //   child: Column(
+            //     children: [
+            //       const SizedBox(height: 30),
                   
-                  // User Profile Section
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFFFF6B35), Color(0xFFFF8E53)],
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.orange.withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 3),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: const CircleAvatar(
-                            backgroundImage: AssetImage("assets/images/user.png"),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text(
-                                "User Name",
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                "I love fast food 🍔",
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              LinearProgressIndicator(
-                                value: 0.7,
-                                backgroundColor: Colors.white30,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                borderRadius: BorderRadius.all(Radius.circular(10)),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                "Profile 70% complete",
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            //       // User Profile Section
+            //       Container(
+            //         margin: const EdgeInsets.symmetric(horizontal: 16),
+            //         padding: const EdgeInsets.all(24),
+            //         decoration: BoxDecoration(
+            //           gradient: const LinearGradient(
+            //             begin: Alignment.topLeft,
+            //             end: Alignment.bottomRight,
+            //             colors: [Color(0xFFFF6B35), Color(0xFFFF8E53)],
+            //           ),
+            //           borderRadius: BorderRadius.circular(24),
+            //           boxShadow: [
+            //             BoxShadow(
+            //               color: Colors.orange.withOpacity(0.3),
+            //               blurRadius: 20,
+            //               offset: const Offset(0, 8),
+            //             ),
+            //           ],
+            //         ),
+            //         child: Row(
+            //           children: [
+            //             Container(
+            //               width: 80,
+            //               height: 80,
+            //               decoration: BoxDecoration(
+            //                 shape: BoxShape.circle,
+            //                 border: Border.all(color: Colors.white, width: 3),
+            //                 boxShadow: [
+            //                   BoxShadow(
+            //                     color: Colors.black.withOpacity(0.1),
+            //                     blurRadius: 10,
+            //                     offset: const Offset(0, 4),
+            //                   ),
+            //                 ],
+            //               ),
+            //               child: const CircleAvatar(
+            //                 backgroundImage: AssetImage("assets/images/user.png"),
+            //               ),
+            //             ),
+            //             const SizedBox(width: 16),
+            //             Expanded(
+            //               child: Column(
+            //                 crossAxisAlignment: CrossAxisAlignment.start,
+            //                 children: const [
+            //                   Text(
+            //                     "User Name",
+            //                     style: TextStyle(
+            //                       fontSize: 20,
+            //                       fontWeight: FontWeight.bold,
+            //                       color: Colors.white,
+            //                     ),
+            //                   ),
+            //                   SizedBox(height: 4),
+            //                   Text(
+            //                     "I love fast food 🍔",
+            //                     style: TextStyle(
+            //                       color: Colors.white70,
+            //                       fontSize: 14,
+            //                     ),
+            //                   ),
+            //                   SizedBox(height: 8),
+            //                   LinearProgressIndicator(
+            //                     value: 0.7,
+            //                     backgroundColor: Colors.white30,
+            //                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            //                     borderRadius: BorderRadius.all(Radius.circular(10)),
+            //                   ),
+            //                   SizedBox(height: 4),
+            //                   Text(
+            //                     "Profile 70% complete",
+            //                     style: TextStyle(
+            //                       color: Colors.white70,
+            //                       fontSize: 12,
+            //                     ),
+            //                   ),
+            //                 ],
+            //               ),
+            //             ),
+            //           ],
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
             
             SliverToBoxAdapter(
               child: _buildSection(
@@ -287,28 +287,24 @@ class ProfileScreen extends StatelessWidget {
                 title: "Preferences",
                 children: [
                   _buildMenuItem(
-                    icon: LucideIcons.shoppingCart,
-                    title: "Cart",
-                    subtitle: "3 items waiting",
+                    icon: LucideIcons.listOrdered,
+                    title: "Orders",
+                    subtitle: "items waiting",
+                     onTap: () {
+                       Navigator.pushNamed(context, AppRoutes.orderhistory);
+                    },
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16),
                   _buildMenuItem(
                     icon: LucideIcons.heart,
                     title: "Favourite",
-                    subtitle: "12 liked items",
+                    subtitle: "liked items",
+                    onTap: () {
+                       Navigator.pushNamed(context, AppRoutes.Favorite);
+                    },
                   ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildMenuItem(
-                    icon: LucideIcons.bell,
-                    title: "Notifications",
-                    subtitle: "Manage notifications",
-                  ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  _buildMenuItem(
-                    icon: LucideIcons.creditCard,
-                    title: "Payment Method",
-                    subtitle: "2 cards added",
-                  ),
+                  
+                 
                 ],
               ),
             ),
@@ -317,12 +313,6 @@ class ProfileScreen extends StatelessWidget {
               child: _buildSection(
                 title: "More",
                 children: [
-                  _buildMenuItem(
-                    icon: LucideIcons.star,
-                    title: "User Reviews",
-                    subtitle: "Your ratings and reviews",
-                  ),
-                  const Divider(height: 1, indent: 16, endIndent: 16),
                   _buildMenuItem(
                     icon: LucideIcons.settings,
                     title: "Settings",

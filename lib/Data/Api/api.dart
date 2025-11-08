@@ -1,4 +1,4 @@
-// ignore_for_file: unused_catch_clause, avoid_print
+// ignore_for_file: unused_catch_clause, avoid_print, non_constant_identifier_names
 
 import 'dart:convert';
 import 'dart:io';
@@ -9,7 +9,7 @@ import 'dart:async';
 
 
 class ApiDetails {
-  static String ip = "10.239.3.123";
+  static String ip = "10.114.243.123";
 
   static String get loginApi => "http://$ip/quickbites/login.php";
   static String get singupApi => "http://$ip/quickbites/singup.php";
@@ -22,7 +22,8 @@ class ApiDetails {
   static String get addAddress => "http://$ip/quickbites/InsertAddress.php";
   static String get updateAddress => "http://$ip/quickbites/UpdateAddress.php";
   static String get deleteAddress => "http://$ip/quickbites/DeleteAddress.php";
-
+  static String get order => "http://$ip/quickbites/order.php";
+ static String get OrderHistory=> "http://$ip/quickbites/OrderHistory.php";
   
 }
 
