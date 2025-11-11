@@ -1,4 +1,6 @@
 // FoodDetailScreen.dart
+// ignore_for_file: avoid_print, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:quick_bites/Data/Api/CartModel.dart';
@@ -56,78 +58,83 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
       }
     }
   }
-void _toggleFavorite() async {
-  try {
-    final favoriteBox = await HiveService.getBox<FavoriteItem>('favoriteBox');
-    final existingItemKey = _findExistingFavoriteItem(favoriteBox);
 
-    if (existingItemKey != null) {
-      // Remove from favorites
-      await favoriteBox.delete(existingItemKey);
-      if (mounted) {
-        setState(() {
-          isFavorite = false;
-        });
+  void _toggleFavorite() async {
+    try {
+      final favoriteBox = await HiveService.getBox<FavoriteItem>('favoriteBox');
+      final existingItemKey = _findExistingFavoriteItem(favoriteBox);
+
+      if (existingItemKey != null) {
+        // Remove from favorites
+        await favoriteBox.delete(existingItemKey);
+        if (mounted) {
+          setState(() {
+            isFavorite = false;
+          });
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Removed ${widget.foodItem.name} from favorites'),
+            backgroundColor: Colors.orange,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      } else {
+        // Add to favorites - keep foodId as String
+        final favoriteItem = FavoriteItem(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          foodId: int.parse(widget.foodItem.itemId), // Keep as String
+          name: widget.foodItem.name,
+          description: widget.foodItem.description,
+          price: widget.foodItem.price,
+          image: widget.foodItem.img,
+          addedAt: DateTime.now(),
+        );
+        await favoriteBox.add(favoriteItem);
+        if (mounted) {
+          setState(() {
+            isFavorite = true;
+          });
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added ${widget.foodItem.name} to favorites'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
       }
+    } catch (e) {
+      print('Error toggling favorite: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Removed ${widget.foodItem.name} from favorites'),
-          backgroundColor: Colors.orange,
+          content: Text('Error: Could not update favorites - $e'),
+          backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      );
-    } else {
-      // Add to favorites - keep foodId as String
-      final favoriteItem = FavoriteItem(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        foodId: int.parse(widget.foodItem.itemId), // Keep as String
-        name: widget.foodItem.name,
-        description: widget.foodItem.description,
-        price: widget.foodItem.price,
-        image: widget.foodItem.img,
-        addedAt: DateTime.now(),
-      );
-      await favoriteBox.add(favoriteItem);
-      if (mounted) {
-        setState(() {
-          isFavorite = true;
-        });
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Added ${widget.foodItem.name} to favorites'),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
         ),
       );
     }
-  } catch (e) {
-    print('Error toggling favorite: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error: Could not update favorites - $e'),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
-}
 
-String? _findExistingFavoriteItem(Box<FavoriteItem> favoriteBox) {
-  for (var i = 0; i < favoriteBox.length; i++) {
-    final item = favoriteBox.getAt(i);
-    if (item?.foodId == widget.foodItem.itemId) { // String comparison
-      return favoriteBox.keyAt(i) as String;
+  String? _findExistingFavoriteItem(Box<FavoriteItem> favoriteBox) {
+    final currentFoodId = int.parse(widget.foodItem.itemId); // Parse to int
+
+    for (var i = 0; i < favoriteBox.length; i++) {
+      final item = favoriteBox.getAt(i);
+      if (item?.foodId == currentFoodId) {
+        // Compare int with int
+        return favoriteBox.keyAt(i) as String;
+      }
     }
+    return null;
   }
-  return null;
-}
+
   @override
   Widget build(BuildContext context) {
     var ImageBase = ApiDetails.ip;
@@ -582,15 +589,38 @@ String? _findExistingFavoriteItem(Box<FavoriteItem> favoriteBox) {
       if (existingItemKey != null) {
         final existingItem = cartBox.get(existingItemKey);
         if (existingItem != null) {
+          final newQuantity = existingItem.quantity + quantity;
           cartBox.put(
-              existingItemKey,
-              existingItem.copyWith(
-                  quantity: existingItem.quantity + quantity));
+            existingItemKey,
+            existingItem.copyWith(quantity: newQuantity),
+          );
+
+          // Show success message for updating quantity
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'Updated ${widget.foodItem.name} quantity to $newQuantity'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              duration: const Duration(seconds: 2),
+              action: SnackBarAction(
+                label: 'View Cart',
+                textColor: Colors.white,
+                onPressed: () {
+                  // Navigate to cart screen
+                  // Navigator.push(context, MaterialPageRoute(builder: (context) => CartScreen()));
+                },
+              ),
+            ),
+          );
         }
       } else {
         final cartItem = CartItem(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
-          foodId: widget.foodItem.itemId, // Keep as string for CartItem
+          foodId: widget.foodItem.itemId,
           name: widget.foodItem.name,
           description: widget.foodItem.description,
           price: widget.foodItem.price,
@@ -598,11 +628,41 @@ String? _findExistingFavoriteItem(Box<FavoriteItem> favoriteBox) {
           quantity: quantity,
           addedAt: DateTime.now(),
         );
-        cartBox.add(cartItem);
+        await cartBox.add(cartItem);
+
+        // Show success message for adding new item
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Added ${widget.foodItem.name} to cart'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 2),
+            action: SnackBarAction(
+              label: 'View Cart',
+              textColor: Colors.white,
+              onPressed: () {
+                // Navigate to cart screen
+                // Navigator.push(context, MaterialPageRoute(builder: (context) => CartScreen()));
+              },
+            ),
+          ),
+        );
       }
-      // ... rest of _addToCart method
     } catch (e) {
-      // ... error handling
+      print('Error adding to cart: $e');
+
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to add ${widget.foodItem.name} to cart: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
   }
 

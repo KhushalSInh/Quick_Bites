@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 
 part 'AddModel.g.dart';
 
-@HiveType(typeId: 1)
+@HiveType(typeId: 4)
 class UserAdd extends HiveObject {
   @HiveField(0)
   late String id;

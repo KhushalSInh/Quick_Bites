@@ -23,13 +23,14 @@ class DataAdapter extends TypeAdapter<Data> {
       description: fields[3] as String,
       price: fields[4] as String,
       img: fields[5] as String,
+      categoryId: fields[6] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Data obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.itemId)
       ..writeByte(1)
@@ -41,7 +42,9 @@ class DataAdapter extends TypeAdapter<Data> {
       ..writeByte(4)
       ..write(obj.price)
       ..writeByte(5)
-      ..write(obj.img);
+      ..write(obj.img)
+      ..writeByte(6)
+      ..write(obj.categoryId);
   }
 
   @override

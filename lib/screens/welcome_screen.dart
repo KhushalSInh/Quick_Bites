@@ -14,7 +14,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   void initState() {
     super.initState();
     DataManage.fetchFoodItems();
-  }
+    DataManage.fetchFoodCategories();
+   }
 
   @override
   Widget build(BuildContext context) {

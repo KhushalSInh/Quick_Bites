@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'FavoriteModel.g.dart';
 
-@HiveType(typeId: 1)
+@HiveType(typeId: 3)
 class FavoriteItem {
   @HiveField(0)
   final String id;

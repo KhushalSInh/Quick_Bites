@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:hive/hive.dart';
 import 'package:quick_bites/Data/Api/AddModel.dart';
+import 'package:quick_bites/Data/Api/CategoryModel.dart';
 import 'package:quick_bites/Data/Api/Model.dart';
 import 'package:quick_bites/Data/Api/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,6 +45,21 @@ class HiveKey {
   return box.values.toList();
 }
 
+  static Future<void> storeCategoriesInHive(String jsonString) async {
+    final jsonData = jsonDecode(jsonString);
+    final categoriesList = (jsonData['data'] as List)
+        .map((item) => FoodCategory.fromJson(item))
+        .toList();
+
+    var box = Hive.box<FoodCategory>('categoriesBox');
+    await box.clear();
+    await box.addAll(categoriesList);
+  }
+
+  static List<FoodCategory> getCategoriesFromHive() {
+    var box = Hive.box<FoodCategory>('categoriesBox');
+    return box.values.toList();
+  }
 }
 
 class DataManage {
@@ -224,4 +240,37 @@ class DataManage {
       return false;
     }
   }
+
+static Future<void> fetchFoodCategories() async {
+    try {
+      var response = await ApiService.request(
+        url: ApiDetails.foodCategories,
+        method: "GET",
+      );
+
+      await HiveKey.storeCategoriesInHive(jsonEncode(response));
+      print('✅ Categories fetched and stored in Hive successfully');
+    } catch (e) {
+      print('❌ Error fetching or storing categories: $e');
+    }
+  }
+
+  // OPTIONAL: Method to fetch items by category
+  static Future<void> fetchItemsByCategory(String categoryId) async {
+    try {
+      var response = await ApiService.request(
+        url: ApiDetails.itemsByCategory,
+        method: "POST",
+        body: {
+          "category_id": categoryId,
+        },
+      );
+
+      await HiveKey.storeItemsInHive(jsonEncode(response));
+      print('✅ Items for category $categoryId fetched successfully');
+    } catch (e) {
+      print('❌ Error fetching items by category: $e');
+    }
+  }
+
 }

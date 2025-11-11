@@ -1,50 +1,41 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'FavoriteModel.dart';
+part of 'CategoryModel.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class FavoriteItemAdapter extends TypeAdapter<FavoriteItem> {
+class FoodCategoryAdapter extends TypeAdapter<FoodCategory> {
   @override
-  final int typeId = 3;
+  final int typeId = 5;
 
   @override
-  FavoriteItem read(BinaryReader reader) {
+  FoodCategory read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return FavoriteItem(
+    return FoodCategory(
       id: fields[0] as String,
-      foodId: fields[1] as int,
-      name: fields[2] as String,
-      description: fields[3] as String,
-      price: fields[4] as String,
-      image: fields[5] as String,
-      addedAt: fields[6] as DateTime,
+      name: fields[1] as String,
+      createdAt: fields[2] as String,
+      updatedAt: fields[3] as String,
     );
   }
 
   @override
-  void write(BinaryWriter writer, FavoriteItem obj) {
+  void write(BinaryWriter writer, FoodCategory obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.foodId)
-      ..writeByte(2)
       ..write(obj.name)
+      ..writeByte(2)
+      ..write(obj.createdAt)
       ..writeByte(3)
-      ..write(obj.description)
-      ..writeByte(4)
-      ..write(obj.price)
-      ..writeByte(5)
-      ..write(obj.image)
-      ..writeByte(6)
-      ..write(obj.addedAt);
+      ..write(obj.updatedAt);
   }
 
   @override
@@ -53,7 +44,7 @@ class FavoriteItemAdapter extends TypeAdapter<FavoriteItem> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is FavoriteItemAdapter &&
+      other is FoodCategoryAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

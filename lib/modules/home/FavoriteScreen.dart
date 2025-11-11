@@ -295,7 +295,8 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
       name: favoriteItem.name,
       description: favoriteItem.description,
       price: favoriteItem.price,
-      img: favoriteItem.image,
+      img: favoriteItem.image, 
+      categoryId: favoriteItem.id,  //jduegdygedgedgedguiedgyehd
     );
 
     // Wait for result from FoodDetailScreen

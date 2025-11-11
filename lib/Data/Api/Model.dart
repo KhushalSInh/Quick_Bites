@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
 
-part 'Model.g.dart'; // This will be generated
+part 'Model.g.dart';
 
 @HiveType(typeId: 0)
 class Data extends HiveObject {
@@ -22,6 +22,9 @@ class Data extends HiveObject {
   @HiveField(5)
   late String img;
 
+  @HiveField(6) // NEW FIELD - Add this
+  late String categoryId; // Changed to String to match your database
+
   Data({
     required this.itemId,
     required this.sloat,
@@ -29,6 +32,7 @@ class Data extends HiveObject {
     required this.description,
     required this.price,
     required this.img,
+    required this.categoryId, // NEW - Add this
   });
 
   factory Data.fromJson(Map<String, dynamic> json) {
@@ -39,6 +43,7 @@ class Data extends HiveObject {
       description: json['Description'],
       price: json['price'],
       img: json['img'],
+      categoryId: json['category_id'].toString(), // NEW - Convert to string
     );
   }
 
@@ -49,5 +54,6 @@ class Data extends HiveObject {
         'Description': description,
         'price': price,
         'img': img,
+        'category_id': categoryId, // NEW - Add this
       };
 }

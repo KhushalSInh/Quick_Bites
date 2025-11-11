@@ -1,7 +1,9 @@
 // OrderHistoryScreen.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:quick_bites/Data/Api/api.dart';
+import 'package:quick_bites/Data/Api/Model.dart'; // Import your Data model
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
@@ -66,6 +68,32 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         _hasError = true;
         _errorMessage = 'Network error: $e';
       });
+    }
+  }
+
+  // NEW METHOD: Get item name from Hive using item_id
+  String _getItemName(dynamic itemId) {
+    try {
+      final itemsBox = Hive.box<Data>('itemsBox');
+      final String searchId = itemId.toString();
+      
+      // Find the item in Hive by item_id
+      final item = itemsBox.values.firstWhere(
+        (data) => data.itemId == searchId,
+        orElse: () => Data(
+          itemId: '0',
+          sloat: '0',
+          name: 'Item Not Found',
+          description: '',
+          price: '0',
+          img: '',
+          categoryId: '0',
+        ),
+      );
+      
+      return item.name;
+    } catch (e) {
+      return 'Item #$itemId';
     }
   }
 
@@ -241,7 +269,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       return sum + qty;
     });
 
-
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
@@ -319,7 +346,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
 
             const SizedBox(height: 12),
 
-            // Items Preview
+            // Items Preview - UPDATED: Using actual item names from Hive
             if (parsedItems.isNotEmpty) ...[
               _buildItemsPreview(parsedItems),
               const SizedBox(height: 12),
@@ -447,20 +474,24 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         const SizedBox(height: 8),
         Column(
           children: previewItems.map<Widget>((item) {
-            final itemName = _getItemName(item['item_id']);
+            final itemName = _getItemName(item['item_id']); // This now uses Hive data
             final quantity = item['qty']?.toString() ?? '1';
             return Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Row(
                 children: [
-                  Text(
-                    '• $itemName',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[700],
+                  Expanded(
+                    child: Text(
+                      '• $itemName',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(width: 8),
                   Text(
                     'Qty: $quantity',
                     style: TextStyle(
@@ -487,21 +518,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
           ),
       ],
     );
-  }
-
-  String _getItemName(dynamic itemId) {
-    // You can replace this with actual item names from your database
-    // For now, using generic names based on item ID
-    final id = itemId is int ? itemId : int.tryParse(itemId.toString()) ?? 0;
-    final names = {
-      1: 'Margherita Pizza',
-      2: 'Pepperoni Pizza',
-      3: 'Chicken Burger',
-      4: 'Veg Burger',
-      5: 'French Fries',
-      6: 'Coca Cola',
-    };
-    return names[id] ?? 'Item #$itemId';
   }
 
   String _formatDate(String dateString) {
@@ -559,11 +575,36 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   }
 }
 
-// Order Details Bottom Sheet
+// Updated Order Details Bottom Sheet
 class OrderDetailsBottomSheet extends StatelessWidget {
   final Map<String, dynamic> order;
 
   const OrderDetailsBottomSheet({super.key, required this.order});
+
+  // NEW METHOD: Get item name from Hive
+  String _getItemName(dynamic itemId) {
+    try {
+      final itemsBox = Hive.box<Data>('itemsBox');
+      final String searchId = itemId.toString();
+      
+      final item = itemsBox.values.firstWhere(
+        (data) => data.itemId == searchId,
+        orElse: () => Data(
+          itemId: '0',
+          sloat: '0',
+          name: 'Item Not Found',
+          description: '',
+          price: '0',
+          img: '',
+          categoryId: '0',
+        ),
+      );
+      
+      return item.name;
+    } catch (e) {
+      return 'Item #$itemId';
+    }
+  }
 
   String _capitalizeFirstLetter(String text) {
     if (text.isEmpty) return text;
@@ -588,19 +629,6 @@ class OrderDetailsBottomSheet extends StatelessWidget {
       default:
         return _capitalizeFirstLetter(method.replaceAll('_', ' '));
     }
-  }
-
-  String _getItemName(dynamic itemId) {
-    final id = itemId is int ? itemId : int.tryParse(itemId.toString()) ?? 0;
-    final names = {
-      1: 'Margherita Pizza',
-      2: 'Pepperoni Pizza',
-      3: 'Chicken Burger',
-      4: 'Veg Burger',
-      5: 'French Fries',
-      6: 'Coca Cola',
-    };
-    return names[id] ?? 'Item #$itemId';
   }
 
   @override
@@ -678,7 +706,7 @@ class OrderDetailsBottomSheet extends StatelessWidget {
             ),
           ),
 
-          // Items List
+          // Items List - UPDATED: Using actual item names from Hive
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Card(
@@ -700,7 +728,7 @@ class OrderDetailsBottomSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     ...parsedItems.map<Widget>((item) {
-                      final itemName = _getItemName(item['item_id']);
+                      final itemName = _getItemName(item['item_id']); // This now uses Hive data
                       final quantity = item['qty']?.toString() ?? '1';
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
