@@ -1,4 +1,6 @@
 // Create a new file: OrderSuccessScreen.dart
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 
 class OrderSuccessScreen extends StatelessWidget {

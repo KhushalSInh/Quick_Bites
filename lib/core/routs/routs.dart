@@ -1,8 +1,5 @@
+
 // ignore_for_file: constant_identifier_names
-
-
-
-import 'package:quick_bites/Data/Api/FavoriteModel.dart';
 
 class AppRoutes {
   static const welcome = '/welcome';
@@ -20,8 +17,8 @@ class AppRoutes {
 
   static const orderhistory = '/orderhistory';
   static const Favorite = '/Favorite';
+
+  static const Profile = '/Profile';
+  static const setting = '/setting';
   
-
-
-
 }

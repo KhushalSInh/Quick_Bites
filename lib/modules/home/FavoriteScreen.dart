@@ -1,4 +1,6 @@
 // FavoriteScreen.dart
+// ignore_for_file: non_constant_identifier_names, deprecated_member_use, use_build_context_synchronously, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:quick_bites/Data/Api/FavoriteModel.dart';

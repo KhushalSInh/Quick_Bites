@@ -4,8 +4,10 @@
 import 'package:flutter/material.dart';
 import 'package:quick_bites/Data/Api/Hive_Service.dart'; // Add this
 import 'package:quick_bites/modules/home/Address.dart';
+import 'package:quick_bites/modules/home/ChangePasswordScreen.dart';
 import 'package:quick_bites/modules/home/FavoriteScreen.dart';
 import 'package:quick_bites/modules/home/OrderHistoryScreen.dart';
+import 'package:quick_bites/modules/home/UserProfile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:quick_bites/modules/auth/AuthScreen.dart';
 import 'package:quick_bites/modules/home/MainLayout.dart';
@@ -86,6 +88,8 @@ class MyApp extends StatelessWidget {
         AppRoutes.Address: (context) => const AddressScreen(),
         AppRoutes.orderhistory: (context) => const OrderHistoryScreen(),
         AppRoutes.Favorite: (context) => const FavoriteScreen(),
+        AppRoutes.Profile: (context) => const Userprofile(),
+        AppRoutes.setting: (context) => const ChangePasswordScreen(),
       },
     );
   }

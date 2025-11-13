@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, unused_local_variable
+// ignore_for_file: avoid_print, unused_local_variable, unnecessary_null_comparison
 
 import 'dart:convert';
 
@@ -134,7 +134,7 @@ class DataManage {
       if (response != null && response['status'] == 'success') {
         return true;
       } else {
-        print("Add address failed: ${response?['message']}");
+        print("Add address failed: ${response['message']}");
         return false;
       }
     } catch (e) {
@@ -181,7 +181,7 @@ class DataManage {
       if (response != null && response['status'] == 'success') {
         return true;
       } else {
-        print("Update address failed: ${response?['message']}");
+        print("Update address failed: ${response['message']}");
         return false;
       }
     } catch (e) {
@@ -207,7 +207,7 @@ class DataManage {
       if (response != null && response['status'] == 'success') {
         return true;
       } else {
-        print("Delete address failed: ${response?['message']}");
+        print("Delete address failed: ${response['message']}");
         return false;
       }
     } catch (e) {
@@ -232,7 +232,7 @@ class DataManage {
       if (response != null && response['status'] == 'success') {
         return true;
       } else {
-        print("Set default address failed: ${response?['message']}");
+        print("Set default address failed: ${response['message']}");
         return false;
       }
     } catch (e) {

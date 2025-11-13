@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:quick_bites/modules/home/FormScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:quick_bites/core/routs/routs.dart';
 
@@ -257,16 +256,8 @@ class ProfileScreen extends StatelessWidget {
                     icon: LucideIcons.user,
                     title: "Personal Info",
                     subtitle: "Update your personal details",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => FormScreen(
-                            title: "Personal Info",
-                            mode: FormMode.personalInfo,
-                          ),
-                        ),
-                      );
+                     onTap: () {
+                       Navigator.pushNamed(context, AppRoutes.Profile);
                     },
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16),
@@ -317,6 +308,9 @@ class ProfileScreen extends StatelessWidget {
                     icon: LucideIcons.settings,
                     title: "Settings",
                     subtitle: "App preferences",
+                     onTap: () {
+                       Navigator.pushNamed(context, AppRoutes.setting);
+                    },
                   ),
                 ],
               ),

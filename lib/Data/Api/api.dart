@@ -9,7 +9,7 @@ import 'dart:async';
 
 
 class ApiDetails {
-  static String ip = "10.91.9.123";
+  static String ip = "10.253.216.123";
 
   static String get loginApi => "http://$ip/quickbites/login.php";
   static String get singupApi => "http://$ip/quickbites/singup.php";
@@ -27,7 +27,9 @@ class ApiDetails {
 
   static String get foodCategories => "http://$ip/quickbites/Categories.php";
   static String get itemsByCategory => "http://$ip/quickbites/ItemsByCategory.php";
-  
+
+  static String get getprofile => "http://$ip/quickbites/GetUser.php";
+  static String get updateuser => "http://$ip/quickbites/UpdateUser.php";
 }
 
 
