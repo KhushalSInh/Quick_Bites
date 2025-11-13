@@ -69,12 +69,50 @@ class ForgetpasswordController extends GetxController {
         type: MessageType.success,
       );
       Future.delayed(Duration(seconds: 2), () {
-        Navigator.pushNamedAndRemoveUntil(
+        Navigator.pushNamed(
           context,
           AppRoutes.OtpFillAuth,
-          (route) => false,
         );
       });
+    } else {
+      showCustomMessageDialog(
+        context,
+        message: responseData['message'] ?? 'Login failed.',
+        type: MessageType.error,
+      );
+    }
+  }
+
+
+void sendEmialAgain(BuildContext context, {required String email}) async {
+    final int otp = generateAndStoreOTP();
+    final String otpString = otp.toString();
+    final Map<String, dynamic> responseData = await ApiService.request(
+      url: ApiDetails.forgetPassword,
+      method: "POST",
+      body: {'email': email, 'otp':otpString},
+    );
+
+    if (responseData.containsKey('error') && responseData['error'] == true) {
+      showCustomMessageDialog(
+        context,
+        message:
+            responseData['message'] ?? 'An unknown network error occurred.',
+        type: MessageType.error,
+      );
+    }
+
+    if (responseData['message'] == "OTP Send Succesfully") {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_email', email.toString());
+      await prefs.setString('user_otp', otp.toString());
+
+      showCustomMessageDialog(
+        context,
+        message: responseData['message'] ?? 'OTP sent successfully.',
+        type: MessageType.success,
+      );
+      
     } else {
       showCustomMessageDialog(
         context,

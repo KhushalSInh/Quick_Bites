@@ -5,16 +5,14 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 
-
-
-
 class ApiDetails {
-  static String ip = "10.253.216.123";
+  static String ip = "10.91.9.123";
 
   static String get loginApi => "http://$ip/quickbites/login.php";
   static String get singupApi => "http://$ip/quickbites/singup.php";
   static String get forgetPassword => "http://$ip/quickbites/sendOtp.php";
-  static String get changePasswordApi => "http://$ip/quickbites/Change_password.php";
+  static String get changePasswordApi =>"http://$ip/quickbites/Change_password.php";
+  static String get ResetPasswordApi =>"http://$ip/quickbites/ResetPassword.php";
 
   static String get fooditems => "http://$ip/quickbites/Items.php";
 
@@ -22,16 +20,16 @@ class ApiDetails {
   static String get addAddress => "http://$ip/quickbites/InsertAddress.php";
   static String get updateAddress => "http://$ip/quickbites/UpdateAddress.php";
   static String get deleteAddress => "http://$ip/quickbites/DeleteAddress.php";
+
   static String get order => "http://$ip/quickbites/order.php";
- static String get OrderHistory=> "http://$ip/quickbites/OrderHistory.php";
+  static String get OrderHistory => "http://$ip/quickbites/OrderHistory.php";
 
   static String get foodCategories => "http://$ip/quickbites/Categories.php";
-  static String get itemsByCategory => "http://$ip/quickbites/ItemsByCategory.php";
+  static String get itemsByCategory =>"http://$ip/quickbites/ItemsByCategory.php";
 
   static String get getprofile => "http://$ip/quickbites/GetUser.php";
   static String get updateuser => "http://$ip/quickbites/UpdateUser.php";
 }
-
 
 class ApiService {
   static Future<Map<String, dynamic>> request({
@@ -90,7 +88,8 @@ class ApiService {
       // Handles network-related errors like no internet connection or server offline.
       return {
         "error": true,
-        "message": "Connection Error: Please check your internet connection or server status.",
+        "message":
+            "Connection Error: Please check your internet connection or server status.",
       };
     } on TimeoutException {
       // Handles cases where the request takes too long to respond.

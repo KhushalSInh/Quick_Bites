@@ -75,7 +75,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ),
                       ),
                       onPressed: () =>
-                          Navigator.pushNamed(context, AppRoutes.mainLayout),
+                          Navigator.pushNamed(context, AppRoutes.LoginAuth),
                       child: const Text(
                         'Get started',
                         style: TextStyle(color: Colors.white, fontSize: 18),

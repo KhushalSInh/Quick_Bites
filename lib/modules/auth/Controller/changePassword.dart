@@ -5,13 +5,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quick_bites/Data/Api/api.dart';
+import 'package:quick_bites/core/routs/routs.dart';
 import 'package:quick_bites/core/utils/dialog_helper.dart';
 import 'package:quick_bites/widgets/custom_message_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChangePasswordController extends GetxController {
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmNewPasswordController = TextEditingController();
+  final TextEditingController confirmNewPasswordController =
+      TextEditingController();
 
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
@@ -36,77 +38,81 @@ class ChangePasswordController extends GetxController {
   }
 
   Future<void> changePassword(BuildContext context) async {
-    isLoading.value = true;
-    errorMessage.value = '';
+    final newPassword = newPasswordController.text.trim();
+    final confirmPassword = confirmNewPasswordController.text.trim();
 
-    // Simple validation checks
-    if (newPasswordController.text != confirmNewPasswordController.text) {
-      errorMessage.value = 'New password and confirm password do not match.';
-      isLoading.value = false;
+    // Validation
+    if (newPassword.isEmpty || confirmPassword.isEmpty) {
+      showCustomMessageDialog(
+        context,
+        message: "Please fill in all fields.",
+        type: MessageType.error,
+      );
       return;
     }
 
-    if (newPasswordController.text.length < 6) {
-      errorMessage.value = 'Password must be at least 6 characters long.';
-      isLoading.value = false;
+    if (newPassword.length < 6) {
+      showCustomMessageDialog(
+        context,
+        message: "Password must be at least 6 characters long.",
+        type: MessageType.error,
+      );
       return;
     }
 
-    void changePassword(BuildContext context) async {
-      final newPassword = newPasswordController.text.trim();
-      final confirmPassword = confirmNewPasswordController.text.trim();
+    if (newPassword != confirmPassword) {
+      showCustomMessageDialog(
+        context,
+        message: "Passwords do not match.",
+        type: MessageType.error,
+      );
+      return;
+    }
 
-      // Validation
-      if (newPassword.isEmpty || confirmPassword.isEmpty) {
-        showCustomMessageDialog(
-          context,
-          message: "Please fill in all fields.",
-          type: MessageType.error,
-        );
-        return;
-      }
-
-      if (newPassword != confirmPassword) {
-        showCustomMessageDialog(
-          context,
-          message: "Passwords do not match.",
-          type: MessageType.error,
-        );
-        return;
-      }
-
+    try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      int? uid = prefs.getInt("user_id");
+      String? userEmail = prefs.getString("user_email"); // Changed to getString
 
+      // Validate email
+      if (userEmail == null || userEmail.isEmpty) {
+        showCustomMessageDialog(
+          context,
+          message: "User email not found. Please login again.",
+          type: MessageType.error,
+        );
+        return;
+      }
+
+      // Call API
       final Map<String, dynamic> responseData = await ApiService.request(
-        url: ApiDetails.changePasswordApi,
+        url: ApiDetails.ResetPasswordApi,
         method: "POST",
         body: {
-          "id": uid.toString(),
+          "email": userEmail,
           "new_password": newPassword,
         },
       );
 
-      if (responseData.containsKey('error') && responseData['error'] == true) {
-        showCustomMessageDialog(
-          context,
-          message:
-              responseData['message'] ?? 'An unknown network error occurred.',
-          type: MessageType.error,
-        );
-      
-        return;
-      }
+      ;
 
-      if (responseData['message'] == "Password updated successfully") {
+      // Handle response based on 'success' field
+      if (responseData['success'] == true) {
         showCustomMessageDialog(
           context,
-          message: "Password updated successfully.",
+          message: responseData['message'] ?? "Password updated successfully.",
           type: MessageType.success,
         );
 
-        Future.delayed(Duration(seconds: 2), () {
-          Navigator.pop(context); // Go back after success
+        // Clear form and navigate back
+        newPasswordController.clear();
+        confirmNewPasswordController.clear();
+
+        Future.delayed(const Duration(seconds: 2), () {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRoutes.LoginAuth,
+            (route) => false,
+          );
         });
       } else {
         showCustomMessageDialog(
@@ -115,8 +121,13 @@ class ChangePasswordController extends GetxController {
           type: MessageType.error,
         );
       }
+    } catch (e) {
+      print("Error changing password: $e");
+      showCustomMessageDialog(
+        context,
+        message: "Network error: Please check your connection.",
+        type: MessageType.error,
+      );
     }
-
-    
   }
 }

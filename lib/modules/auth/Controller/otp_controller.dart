@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quick_bites/core/routs/routs.dart';
 import 'package:quick_bites/core/utils/dialog_helper.dart';
 import 'package:quick_bites/modules/auth/Controller/forgetPassword_controller.dart';
 import 'package:quick_bites/widgets/custom_message_dialog.dart';
@@ -62,7 +63,14 @@ class OtpController extends GetxController {
         type: MessageType.success,
       );
       prefs.remove('user_otp');
-      prefs.remove('user_email');
+      // prefs.remove('user_email');
+
+       Future.delayed(Duration(seconds: 2), () {
+        Navigator.pushNamed(
+          context,
+          AppRoutes.ChangePassAuth,
+        );
+      });
     } else {
       showCustomMessageDialog(
         context,
@@ -80,7 +88,7 @@ class OtpController extends GetxController {
     final email = prefs.getString('user_email');
 
     
-    pasw.sendEmial(context, email: email.toString());
+    pasw.sendEmialAgain(context, email: email.toString());
 
     if (!context.mounted) return; // <--- prevents crash
 
