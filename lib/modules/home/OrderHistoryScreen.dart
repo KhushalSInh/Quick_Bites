@@ -1,9 +1,12 @@
 // OrderHistoryScreen.dart
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:quick_bites/Data/Api/api.dart';
-import 'package:quick_bites/Data/Api/Model.dart'; // Import your Data model
+import 'package:quick_bites/Data/Api/Model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
@@ -25,11 +28,13 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     _loadOrderHistory();
   }
 
+  // UPDATED: Robust order loading with direct HTTP call
   Future<void> _loadOrderHistory() async {
     try {
       setState(() {
         _isLoading = true;
         _hasError = false;
+        _errorMessage = '';
       });
 
       final prefs = await SharedPreferences.getInstance();
@@ -44,22 +49,45 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         return;
       }
 
-      final response = await ApiService.request(
-        url: ApiDetails.OrderHistory,
-        method: "POST",
-        body: {"user_id": userId},
+      // Use direct HTTP call to avoid ApiService issues
+      final response = await http.post(
+        Uri.parse(ApiDetails.OrderHistory),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: json.encode({"user_id": userId}),
       );
 
-      if (response['success'] == true) {
-        setState(() {
-          _orders = response['orders'] ?? [];
-          _isLoading = false;
-        });
+      if (response.statusCode == 200) {
+        try {
+          final responseData = json.decode(response.body);
+
+          if (responseData['success'] == true) {
+            setState(() {
+              _orders = responseData['orders'] ?? [];
+              _isLoading = false;
+            });
+          } else {
+            setState(() {
+              _isLoading = false;
+              _hasError = true;
+              _errorMessage =
+                  responseData['message'] ?? 'Failed to load orders';
+            });
+          }
+        } catch (e) {
+          setState(() {
+            _isLoading = false;
+            _hasError = true;
+            _errorMessage = 'Invalid response format: $e';
+          });
+        }
       } else {
         setState(() {
           _isLoading = false;
           _hasError = true;
-          _errorMessage = response['message'] ?? 'Failed to load order history';
+          _errorMessage = 'Server error: ${response.statusCode}';
         });
       }
     } catch (e) {
@@ -71,13 +99,140 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     }
   }
 
-  // NEW METHOD: Get item name from Hive using item_id
+  // UPDATED: Robust cancel order function
+  Future<void> _cancelOrder(String orderNumber) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt("user_id");
+
+      if (userId == null) {
+        _showSnackBar('User not found. Please login again.', isError: true);
+        return;
+      }
+
+      // Show confirmation dialog
+      final bool? shouldCancel = await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Cancel Order'),
+            content:
+                Text('Are you sure you want to cancel order #$orderNumber?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text(
+                  'Yes, Cancel',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (shouldCancel != true) return;
+
+      // Show loading
+      _showLoadingDialog();
+
+      // Use direct HTTP call
+      final response = await http.post(
+        Uri.parse(ApiDetails.cancelorder),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: json.encode({
+          "user_id": userId,
+          "order_number": orderNumber,
+        }),
+      );
+
+      // Close loading dialog
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      if (response.statusCode == 200) {
+        try {
+          final responseData = json.decode(response.body);
+
+          if (responseData['success'] == true) {
+            _showSnackBar(
+                responseData['message'] ?? 'Order cancelled successfully!');
+            _loadOrderHistory(); // Refresh the list
+          } else {
+            _showSnackBar(responseData['message'] ?? 'Failed to cancel order',
+                isError: true);
+          }
+        } catch (e) {
+          _showSnackBar('Error parsing response: $e', isError: true);
+        }
+      } else {
+        _showSnackBar('Server error: ${response.statusCode}', isError: true);
+      }
+    } catch (e) {
+      // Close loading dialog if still open
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      _showSnackBar('Network error: Please check your connection',
+          isError: true);
+    }
+  }
+
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  // Check if order can be cancelled
+  bool _canCancelOrder(String status) {
+    final lowerStatus = status.toLowerCase();
+    return lowerStatus == 'pending' ||
+        lowerStatus == 'confirmed' ||
+        lowerStatus == 'preparing';
+  }
+
+  // Rest of your existing methods remain the same...
+  // _getItemName, _buildLoading, _buildError, _buildEmpty, _buildOrderList,
+  // _buildOrderCard, _buildStatusBadge, _buildItemsPreview, etc.
+
   String _getItemName(dynamic itemId) {
     try {
       final itemsBox = Hive.box<Data>('itemsBox');
       final String searchId = itemId.toString();
-      
-      // Find the item in Hive by item_id
+
       final item = itemsBox.values.firstWhere(
         (data) => data.itemId == searchId,
         orElse: () => Data(
@@ -90,7 +245,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
           categoryId: '0',
         ),
       );
-      
+
       return item.name;
     } catch (e) {
       return 'Item #$itemId';
@@ -102,13 +257,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text(
-          'Order History',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
+        title: const Text('Order History'),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -141,13 +290,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
             valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
           ),
           SizedBox(height: 16),
-          Text(
-            'Loading your orders...',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-          ),
+          Text('Loading your orders...'),
         ],
       ),
     );
@@ -158,28 +301,13 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline_rounded,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.error_outline_rounded, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 16),
-          Text(
-            _errorMessage,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
+          Text(_errorMessage, textAlign: TextAlign.center),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _loadOrderHistory,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
             child: const Text('Try Again'),
           ),
         ],
@@ -192,36 +320,16 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.shopping_bag_outlined,
-            size: 100,
-            color: Colors.grey[300],
-          ),
+          Icon(Icons.shopping_bag_outlined, size: 100, color: Colors.grey[300]),
           const SizedBox(height: 20),
-          const Text(
-            "No Orders Yet",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.black54,
-            ),
-          ),
+          const Text("No Orders Yet",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          const Text(
-            "You haven't placed any orders yet",
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-          ),
+          const Text("You haven't placed any orders yet"),
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
             child: const Text('Start Shopping'),
           ),
         ],
@@ -246,28 +354,20 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
 
   Widget _buildOrderCard(Map<String, dynamic> order) {
     final orderNumber = order['order_number'] ?? 'N/A';
-    final totalAmount = order['total_amount'] ?? '0.00';
+    final totalAmount = order['total_amount']?.toString() ?? '0.00';
     final orderStatus = order['order_status'] ?? 'pending';
     final createdAt = order['created_at'] ?? '';
-    final paymentMethod = order['payment_method'] ?? 'cash_on_delivery';
     final items = order['items'] is List ? order['items'] : [];
 
-    // Parse items if they're stored as JSON string
-    List<dynamic> parsedItems = [];
-    if (items is String) {
-      try {
-        parsedItems = json.decode(items);
-      } catch (e) {
-        parsedItems = [];
-      }
-    } else {
-      parsedItems = items;
-    }
-
-    final itemCount = parsedItems.fold<int>(0, (int sum, dynamic item) {
-      final int qty = item['qty'] is int ? item['qty'] as int : int.tryParse(item['qty'].toString()) ?? 0;
+    // FIXED: Proper type handling for fold method
+    final itemCount = items.fold<int>(0, (int sum, dynamic item) {
+      final qty = item['qty'] is int
+          ? item['qty'] as int
+          : int.tryParse(item['qty']?.toString() ?? '1') ?? 1;
       return sum + qty;
     });
+
+    final canCancel = _canCancelOrder(orderStatus);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -278,7 +378,6 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Order Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -327,28 +426,14 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                     color: Colors.grey[600],
                   ),
                 ),
-                const SizedBox(width: 16),
-                Icon(
-                  Icons.payment_rounded,
-                  size: 16,
-                  color: Colors.grey[500],
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  _getPaymentMethodText(paymentMethod),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
               ],
             ),
 
             const SizedBox(height: 12),
 
-            // Items Preview - UPDATED: Using actual item names from Hive
-            if (parsedItems.isNotEmpty) ...[
-              _buildItemsPreview(parsedItems),
+            // Items Preview
+            if (items.isNotEmpty) ...[
+              _buildItemsPreview(items),
               const SizedBox(height: 12),
             ],
 
@@ -376,20 +461,40 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
 
             const SizedBox(height: 8),
 
-            // View Details Button
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () => _showOrderDetails(order),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.orange,
-                  side: const BorderSide(color: Colors.orange),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            // Action Buttons
+            Row(
+              children: [
+                // View Details Button
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => _showOrderDetails(order),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.orange,
+                      side: const BorderSide(color: Colors.orange),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('View Details'),
                   ),
                 ),
-                child: const Text('View Details'),
-              ),
+
+                const SizedBox(width: 8),
+
+                // Cancel Order Button (only show if order can be cancelled)
+                if (canCancel)
+                  OutlinedButton(
+                    onPressed: () => _cancelOrder(orderNumber),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('Cancel'),
+                  ),
+              ],
             ),
           ],
         ),
@@ -429,6 +534,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         statusText = 'Delivered';
         break;
       case 'cancelled':
+      case 'cancelled_user':
         backgroundColor = Colors.red.withOpacity(0.1);
         textColor = Colors.red;
         statusText = 'Cancelled';
@@ -436,23 +542,16 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       default:
         backgroundColor = Colors.grey.withOpacity(0.1);
         textColor = Colors.grey;
-        statusText = _capitalizeFirstLetter(status);
+        statusText = status;
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        statusText,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: textColor,
-        ),
-      ),
+          color: backgroundColor, borderRadius: BorderRadius.circular(20)),
+      child: Text(statusText,
+          style: TextStyle(
+              fontSize: 12, fontWeight: FontWeight.bold, color: textColor)),
     );
   }
 
@@ -463,42 +562,25 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Items:',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
+        const Text('Items:',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         Column(
           children: previewItems.map<Widget>((item) {
-            final itemName = _getItemName(item['item_id']); // This now uses Hive data
+            final itemName = _getItemName(item['item_id']);
             final quantity = item['qty']?.toString() ?? '1';
             return Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      '• $itemName',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
+                      child: Text('• $itemName',
+                          style: TextStyle(color: Colors.grey[700]),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis)),
                   const SizedBox(width: 8),
-                  Text(
-                    'Qty: $quantity',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
+                  Text('Qty: $quantity',
+                      style: TextStyle(color: Colors.grey[600])),
                 ],
               ),
             );
@@ -508,13 +590,9 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              '+ $remainingItems more item${remainingItems != 1 ? 's' : ''}',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-                fontStyle: FontStyle.italic,
-              ),
-            ),
+                '+ $remainingItems more item${remainingItems != 1 ? 's' : ''}',
+                style: TextStyle(
+                    color: Colors.grey[500], fontStyle: FontStyle.italic)),
           ),
       ],
     );
@@ -523,46 +601,10 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
   String _formatDate(String dateString) {
     try {
       final date = DateTime.parse(dateString);
-      return '${_getDayName(date.weekday)}, ${date.day} ${_getMonthName(date.month)} ${date.year} at ${_formatTime(date)}';
+      return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
     } catch (e) {
       return dateString;
     }
-  }
-
-  String _getDayName(int weekday) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days[weekday - 1];
-  }
-
-  String _getMonthName(int month) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return months[month - 1];
-  }
-
-  String _formatTime(DateTime date) {
-    final hour = date.hour % 12;
-    final minute = date.minute.toString().padLeft(2, '0');
-    final period = date.hour < 12 ? 'AM' : 'PM';
-    return '${hour == 0 ? 12 : hour}:$minute $period';
-  }
-
-  String _getPaymentMethodText(String method) {
-    switch (method) {
-      case 'cash_on_delivery':
-        return 'Cash on Delivery';
-      case 'online_payment':
-        return 'Online Payment';
-      default:
-        return _capitalizeFirstLetter(method.replaceAll('_', ' '));
-    }
-  }
-
-  String _capitalizeFirstLetter(String text) {
-    if (text.isEmpty) return text;
-    return text[0].toUpperCase() + text.substring(1).toLowerCase();
   }
 
   void _showOrderDetails(Map<String, dynamic> order) {
@@ -570,23 +612,39 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => OrderDetailsBottomSheet(order: order),
+      builder: (context) => OrderDetailsBottomSheet(
+        order: order,
+        onCancelOrder: (orderNumber) => _cancelOrder(orderNumber),
+      ),
     );
   }
 }
 
-// Updated Order Details Bottom Sheet
+// OrderDetailsBottomSheet remains the same as before...
+
+// Updated Order Details Bottom Sheet with Cancel Button
 class OrderDetailsBottomSheet extends StatelessWidget {
   final Map<String, dynamic> order;
+  final Function(String)? onCancelOrder;
 
-  const OrderDetailsBottomSheet({super.key, required this.order});
+  const OrderDetailsBottomSheet(
+      {super.key, required this.order, this.onCancelOrder});
 
-  // NEW METHOD: Get item name from Hive
+  // Check if order can be cancelled
+  bool _canCancelOrder(String status) {
+    final lowerStatus = status.toLowerCase();
+    return lowerStatus != 'cancelled' &&
+        lowerStatus != 'cancelled_user' &&
+        lowerStatus != 'delivered' &&
+        lowerStatus != 'out_for_delivery';
+  }
+
+  // Get item name from Hive
   String _getItemName(dynamic itemId) {
     try {
       final itemsBox = Hive.box<Data>('itemsBox');
       final String searchId = itemId.toString();
-      
+
       final item = itemsBox.values.firstWhere(
         (data) => data.itemId == searchId,
         orElse: () => Data(
@@ -599,7 +657,7 @@ class OrderDetailsBottomSheet extends StatelessWidget {
           categoryId: '0',
         ),
       );
-      
+
       return item.name;
     } catch (e) {
       return 'Item #$itemId';
@@ -652,6 +710,8 @@ class OrderDetailsBottomSheet extends StatelessWidget {
       parsedItems = items;
     }
 
+    final canCancel = _canCancelOrder(orderStatus);
+
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -698,15 +758,17 @@ class OrderDetailsBottomSheet extends StatelessWidget {
                   children: [
                     _buildDetailRow('Order Number', orderNumber),
                     _buildDetailRow('Order Date', _formatDate(createdAt)),
-                    _buildDetailRow('Payment Method', _getPaymentMethodText(paymentMethod)),
-                    _buildDetailRow('Status', _capitalizeFirstLetter(orderStatus)),
+                    _buildDetailRow(
+                        'Payment Method', _getPaymentMethodText(paymentMethod)),
+                    _buildDetailRow(
+                        'Status', _capitalizeFirstLetter(orderStatus)),
                   ],
                 ),
               ),
             ),
           ),
 
-          // Items List - UPDATED: Using actual item names from Hive
+          // Items List
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Card(
@@ -728,7 +790,7 @@ class OrderDetailsBottomSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     ...parsedItems.map<Widget>((item) {
-                      final itemName = _getItemName(item['item_id']); // This now uses Hive data
+                      final itemName = _getItemName(item['item_id']);
                       final quantity = item['qty']?.toString() ?? '1';
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
@@ -793,6 +855,30 @@ class OrderDetailsBottomSheet extends StatelessWidget {
               ),
             ),
           ),
+
+          // Cancel Order Button (only show if order can be cancelled)
+          if (canCancel)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close bottom sheet
+                    onCancelOrder?.call(orderNumber);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Cancel Order'),
+                ),
+              ),
+            ),
 
           const SizedBox(height: 20),
         ],

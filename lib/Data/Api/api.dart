@@ -23,6 +23,7 @@ class ApiDetails {
 
   static String get order => "http://$ip/quickbites/order.php";
   static String get OrderHistory => "http://$ip/quickbites/OrderHistory.php";
+  static String get cancelorder => "http://$ip/quickbites/CancelOrder.php";
 
   static String get foodCategories => "http://$ip/quickbites/Categories.php";
   static String get itemsByCategory =>"http://$ip/quickbites/ItemsByCategory.php";
