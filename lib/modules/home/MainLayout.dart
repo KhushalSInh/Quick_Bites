@@ -1,6 +1,8 @@
 // ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:quick_bites/Data/Api/CartModel.dart';
 import 'package:quick_bites/modules/home/CartScreen.dart';
 import 'package:quick_bites/modules/home/Home_Screen.dart';
 import 'package:quick_bites/modules/home/ProfileScreen.dart';
@@ -97,20 +99,69 @@ class _MainLayoutState extends State<MainLayout> {
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
-        child: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: _onTabTapped,
-          type: BottomNavigationBarType.fixed,
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
-          selectedItemColor: Colors.orange,
-          unselectedItemColor: Colors.grey,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home, size: 28), label: "Home"),
-            BottomNavigationBarItem(icon: Icon(Icons.search, size: 28), label: "Search"),
-            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart, size: 26), label: "Orders"),
-            BottomNavigationBarItem(icon: Icon(Icons.person, size: 28), label: "Profile"),
-          ],
+        child: ValueListenableBuilder(
+          valueListenable: Hive.box<CartItem>('cartBox').listenable(),
+          builder: (context, Box<CartItem> box, _) {
+            final cartItems = box.values.toList();
+            final totalItemCount = cartItems.fold<int>(0, (sum, item) => sum + item.quantity);
+            
+            return BottomNavigationBar(
+              currentIndex: _currentIndex,
+              onTap: _onTabTapped,
+              type: BottomNavigationBarType.fixed,
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+              selectedItemColor: Colors.orange,
+              unselectedItemColor: Colors.grey,
+              items: [
+                const BottomNavigationBarItem(
+                  icon: Icon(Icons.home, size: 28), 
+                  label: "Home"
+                ),
+                const BottomNavigationBarItem(
+                  icon: Icon(Icons.search, size: 28), 
+                  label: "Search"
+                ),
+                BottomNavigationBarItem(
+                  icon: Stack(
+                    children: [
+                      const Icon(Icons.shopping_cart, size: 26),
+                      if (totalItemCount > 0)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
+                            ),
+                            child: Text(
+                              totalItemCount > 99 ? '99+' : totalItemCount.toString(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  label: "Cart",
+                ),
+                const BottomNavigationBarItem(
+                  icon: Icon(Icons.person, size: 28), 
+                  label: "Profile"
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, non_constant_identifier_names
+
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:quick_bites/Data/Api/Model.dart';
@@ -135,11 +137,12 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
       child: Row(
         children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_rounded),
-            onPressed: () => Navigator.pop(context),
-            color: Colors.grey[700],
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.arrow_back_rounded),
+          //   // onPressed: () => Navigator.pop(context),
+          //    onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst),
+          //   color: Colors.grey[700],
+          // ),
           const SizedBox(width: 8),
           Expanded(
             child: Container(

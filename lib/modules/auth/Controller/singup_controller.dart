@@ -14,6 +14,7 @@ class SingupController extends GetxController {
   final usernameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final mobileController = TextEditingController();
 
   final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
   // For password visibility toggle
@@ -28,6 +29,17 @@ class SingupController extends GetxController {
     }
     return null;
   }
+
+ String? validateMobile(String? value) {
+  if (value == null || value.isEmpty) {
+    return "Mobile number is required";
+  } 
+  if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+    return "Enter a valid 10-digit mobile number";
+  }
+  return null;
+}
+
 
   String? validateEmial(String? value) {
     if (value == null || value.isEmpty) {
@@ -50,133 +62,82 @@ class SingupController extends GetxController {
     isPasswordVisible.value = !isPasswordVisible.value;
   }
 
-  void signup2(BuildContext context) async {
-    try {
-      var url = Uri.parse(ApiDetails.singupApi);
 
-      http.Response result = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'name': usernameController.text,
-          'email': emailController.text,
-          'password': passwordController.text,
-        }),
-      );
+  void signup(BuildContext context) async {
+    // Show a loading indicator to the user while the request is in progress.
 
+    final Map<String, dynamic> responseData = await ApiService.request(
+      url: ApiDetails.singupApi,
+      method: "POST",
+      body: {
+        'name': usernameController.text,
+        'email': emailController.text,
+        'password': passwordController.text,
+        'mobile': '1234567890', // Placeholder mobile number
+      },
+    );
 
-      final data = jsonDecode(result.body);
-
-      if (result.statusCode == 200) {
-        if (data['message'] == "Email already registered") {
-          showCustomMessageDialog(
-            context,
-            message: data['message'],
-            type: MessageType.info,
-          );
-        } else if (data['message'] == "Signup successful") {
-          showCustomMessageDialog(
-            context,
-            message: data['message'],
-            type: MessageType.success,
-          );
-          Future.delayed(Duration(seconds: 2), () {
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              AppRoutes.home,
-              (route) => false,
-            );
-          });
-        } else {
-          showCustomMessageDialog(
-            context,
-            message: data['message'],
-            type: MessageType.error,
-          );
-        }
-      } else {
-        showCustomMessageDialog(
-          context,
-          message: "Server error: ${result.statusCode}",
-          type: MessageType.error,
-        );
-      }
-    } catch (e) {
+    if (responseData.containsKey('error') && responseData['error'] == true) {
       showCustomMessageDialog(
         context,
-        message: "Connection Error: $e",
+        message:
+            responseData['message'] ?? 'An unknown network error occurred.',
+        type: MessageType.error,
+      );
+
+      return;
+    }
+
+    // Handle the successful API response based on the 'message' field from the server.
+    final String message =
+        responseData['message'] ?? 'An unexpected server response.';
+    if (message == "Signup successful") {
+      usernameController.text = "";
+      emailController.text = "";
+      mobileController.text = ""; // ⚠ Add this
+      passwordController.text = "";
+      showCustomMessageDialog(
+        context,
+        message: message,
+        type: MessageType.success,
+      );
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setBool("IsLogin", true);
+
+      Future.delayed(Duration(seconds: 1), () {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.LoginAuth,
+          (route) => false,
+        );
+      });
+    } else if (message == "Email already registered") {
+      showCustomMessageDialog(
+        context,
+        message: message,
+        type: MessageType.info,
+      );
+    } else {
+      // Catch any other messages from the server.
+      showCustomMessageDialog(
+        context,
+        message: message,
         type: MessageType.error,
       );
     }
   }
 
-
-  void signup(BuildContext context) async {
-  // Show a loading indicator to the user while the request is in progress.
-
-
-  final Map<String, dynamic> responseData = await ApiService.request(
-    url: ApiDetails.singupApi,
-    method: "POST",
-    body: {
-      'name': usernameController.text,
-      'email': emailController.text,
-      'password': passwordController.text,
-    },
-  );
-
-  
-
-  if (responseData.containsKey('error') && responseData['error'] == true) {
-    
-    showCustomMessageDialog(
-      context,
-      message: responseData['message'] ?? 'An unknown network error occurred.',
-      type: MessageType.error,
-    );
-    
-    return;
-  }
-
-  // Handle the successful API response based on the 'message' field from the server.
-  final String message = responseData['message'] ?? 'An unexpected server response.';
-  if (message == "Signup successful") {
-    showCustomMessageDialog(
-      context,
-      message: message,
-      type: MessageType.success,
-    );
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool("IsLogin", true);
-    
-    Future.delayed(Duration(seconds: 2), () {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.home,
-        (route) => false,
-      );
-    });
-  } else if (message == "Email already registered") {
-    showCustomMessageDialog(
-      context,
-      message: message,
-      type: MessageType.info,
-    );
-  } else {
-    // Catch any other messages from the server.
-    showCustomMessageDialog(
-      context,
-      message: message,
-      type: MessageType.error,
-    );
-  }
-}
-  
   @override
   void onClose() {
+    usernameController.text = "";
+    emailController.text = "";
+    mobileController.text = ""; // ⚠ Add this
+    passwordController.text = "";
+
     usernameController.dispose();
-    passwordController.dispose();
     emailController.dispose();
+    mobileController.dispose(); // ⚠ Add this
+    passwordController.dispose();
     super.onClose();
   }
 }

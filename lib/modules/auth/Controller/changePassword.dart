@@ -1,6 +1,6 @@
 // change_password_controller.dart
 
-// ignore_for_file: use_build_context_synchronously, unused_element
+// ignore_for_file: use_build_context_synchronously, unused_element, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -93,7 +93,7 @@ class ChangePasswordController extends GetxController {
         },
       );
 
-      ;
+      
 
       // Handle response based on 'success' field
       if (responseData['success'] == true) {

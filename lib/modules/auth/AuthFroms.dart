@@ -118,74 +118,85 @@ class AuthForms {
 
   /// ---------------- SIGNUP FORM ----------------
   static Widget signupForm({
-    required GlobalKey<FormState> formKey,
-    required SingupController signupCtrl,
-    required BuildContext context,
-  }) {
-    return Form(
-      key: formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CustomInputField(
-            controller: signupCtrl.usernameController,
-            hintText: "Username",
-            prefixIcon: Icons.person,
-            validator: signupCtrl.validateUsername,
-          ),
+  required GlobalKey<FormState> formKey,
+  required SingupController signupCtrl,
+  required BuildContext context,
+}) {
+  return Form(
+    key: formKey,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
 
-          CustomInputField(
-            controller: signupCtrl.emailController,
-            hintText: "Email",
-            prefixIcon: Icons.email_outlined,
-            validator: signupCtrl.validateEmial,
-          ),
+        CustomInputField(
+          controller: signupCtrl.usernameController,
+          hintText: "Username",
+          prefixIcon: Icons.person,
+          validator: signupCtrl.validateUsername,
+        ),
 
-          Obx(
-            () => CustomInputField(
-              controller: signupCtrl.passwordController,
-              hintText: "Password",
-              prefixIcon: Icons.lock,
-              obscureText: !signupCtrl.isPasswordVisible.value,
-              showSuffixIcon: true,
-              suffixIcon: signupCtrl.isPasswordVisible.value
-                  ? Icons.visibility
-                  : Icons.visibility_off,
-              onSuffixTap: signupCtrl.togglePasswordVisibility,
-              validator: signupCtrl.validatePassword,
-            ),
-          ),
+        CustomInputField(
+          controller: signupCtrl.emailController,
+          hintText: "Email",
+          prefixIcon: Icons.email_outlined,
+          validator: signupCtrl.validateEmial,
+        ),
 
-          const SizedBox(height: 10),
+        /// ⭐ NEW MOBILE NUMBER FIELD
+        CustomInputField(
+          controller: signupCtrl.mobileController,
+          hintText: "Mobile Number",
+          prefixIcon: Icons.phone,
+          keyboardType: TextInputType.phone,
+          validator: signupCtrl.validateMobile,
+        ),
 
-          CustomButton(
-            label: "SIGN UP",
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                signupCtrl.signup(context);
-              }
-            },
+        Obx(
+          () => CustomInputField(
+            controller: signupCtrl.passwordController,
+            hintText: "Password",
+            prefixIcon: Icons.lock,
+            obscureText: !signupCtrl.isPasswordVisible.value,
+            showSuffixIcon: true,
+            suffixIcon: signupCtrl.isPasswordVisible.value
+                ? Icons.visibility
+                : Icons.visibility_off,
+            onSuffixTap: signupCtrl.togglePasswordVisibility,
+            validator: signupCtrl.validatePassword,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("Already have an account?"),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.LoginAuth);
-                },
-                child: const Text(
-                  "LOGIN",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+        ),
+
+        const SizedBox(height: 10),
+
+        CustomButton(
+          label: "SIGN UP",
+          onPressed: () {
+            if (formKey.currentState!.validate()) {
+              signupCtrl.signup(context);
+            }
+          },
+        ),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("Already have an account?"),
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.LoginAuth);
+              },
+              child: const Text(
+                "LOGIN",
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
 
   /// ---------------- FORGETPASSWORD FORM ----------------
   static Widget forgetPassword({

@@ -12,6 +12,9 @@ class CustomInputField extends StatelessWidget {
   final IconData? suffixIcon;
   final FormFieldValidator<String>? validator;
 
+  /// ⭐ NEW OPTIONAL KEYBOARD TYPE
+  final TextInputType? keyboardType;
+
   const CustomInputField({
     super.key,
     required this.controller,
@@ -22,6 +25,9 @@ class CustomInputField extends StatelessWidget {
     this.onSuffixTap,
     this.suffixIcon,
     this.validator,
+
+    /// ⭐ NOT REQUIRED
+    this.keyboardType,
   });
 
   @override
@@ -37,6 +43,10 @@ class CustomInputField extends StatelessWidget {
         controller: controller,
         obscureText: obscureText,
         validator: validator,
+
+        /// ⭐ APPLY KEYBOARD TYPE ONLY IF PROVIDED
+        keyboardType: keyboardType ?? TextInputType.text,
+
         decoration: InputDecoration(
           icon: Icon(prefixIcon),
           hintText: hintText,
@@ -52,4 +62,3 @@ class CustomInputField extends StatelessWidget {
     );
   }
 }
-

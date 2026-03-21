@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:quick_bites/Data/Api/api.dart';
@@ -187,7 +189,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded, color: Colors.black87),
-          onPressed: _isLoading ? null : () => Navigator.pop(context),
+          onPressed:  () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(

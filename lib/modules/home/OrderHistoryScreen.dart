@@ -1,5 +1,5 @@
 // OrderHistoryScreen.dart
-// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously, unnecessary_to_list_in_spreads
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -94,7 +94,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
       setState(() {
         _isLoading = false;
         _hasError = true;
-        _errorMessage = 'Network error: $e';
+        _errorMessage = 'Network error check internet: ';
       });
     }
   }

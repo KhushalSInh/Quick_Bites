@@ -6,6 +6,8 @@ import 'package:quick_bites/Data/Api/CartModel.dart';
 import 'package:quick_bites/Data/Api/api.dart';
 import 'package:quick_bites/Data/Api/AddModel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:quick_bites/modules/home/OrderSuccessScreen.dart';
+import 'package:quick_bites/core/routs/routs.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -38,26 +40,28 @@ class _CartScreenState extends State<CartScreen> {
   void _loadDefaultAddress() async {
     final addressBox = Hive.box<UserAdd>('userAddressBox');
     final addresses = addressBox.values.toList();
-    
+
     // Find default address or select first one
     final defaultAddress = addresses.firstWhere(
       (address) => address.isDefault == "1",
-      orElse: () => addresses.isNotEmpty ? addresses.first : UserAdd(
-        id: '',
-        userId: '',
-        type: '',
-        name: '',
-        pincode: '',
-        state: '',
-        district: '',
-        city: '',
-        al1: '',
-        al2: '',
-        createdAt: '',
-        isDefault: '',
-      ),
+      orElse: () => addresses.isNotEmpty
+          ? addresses.first
+          : UserAdd(
+              id: '',
+              userId: '',
+              type: '',
+              name: '',
+              pincode: '',
+              state: '',
+              district: '',
+              city: '',
+              al1: '',
+              al2: '',
+              createdAt: '',
+              isDefault: '',
+            ),
     );
-    
+
     if (mounted) {
       setState(() {
         _selectedAddress = defaultAddress;
@@ -74,18 +78,18 @@ class _CartScreenState extends State<CartScreen> {
           children: [
             // App Bar
             _buildAppBar(),
-            
+
             // Cart Items
             Expanded(
               child: ValueListenableBuilder(
                 valueListenable: Hive.box<CartItem>('cartBox').listenable(),
                 builder: (context, Box<CartItem> box, _) {
                   final cartItems = box.values.toList();
-                  
+
                   if (cartItems.isEmpty) {
                     return _buildEmptyCart();
                   }
-                  
+
                   return Column(
                     children: [
                       // Cart Items List
@@ -99,7 +103,7 @@ class _CartScreenState extends State<CartScreen> {
                           },
                         ),
                       ),
-                      
+
                       // Checkout Section
                       _buildCheckoutSection(cartItems),
                     ],
@@ -120,7 +124,6 @@ class _CartScreenState extends State<CartScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
@@ -129,11 +132,11 @@ class _CartScreenState extends State<CartScreen> {
       ),
       child: Row(
         children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_rounded),
-            onPressed: () => Navigator.pop(context),
-            color: Colors.grey[700],
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.arrow_back_rounded),
+          //   onPressed: () => Navigator.pop(context),
+          //   color: Colors.grey[700],
+          // ),
           const SizedBox(width: 8),
           const Text(
             "My Cart",
@@ -147,7 +150,8 @@ class _CartScreenState extends State<CartScreen> {
           ValueListenableBuilder(
             valueListenable: Hive.box<CartItem>('cartBox').listenable(),
             builder: (context, Box<CartItem> box, _) {
-              final itemCount = box.values.fold<int>(0, (sum, item) => sum + item.quantity);
+              final itemCount =
+                  box.values.fold<int>(0, (sum, item) => sum + item.quantity);
               return Badge(
                 label: Text(itemCount.toString()),
                 child: IconButton(
@@ -165,7 +169,7 @@ class _CartScreenState extends State<CartScreen> {
 
   Widget _buildCartItem(CartItem item, Box<CartItem> box) {
     var ImageBase = ApiDetails.ip;
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -195,9 +199,9 @@ class _CartScreenState extends State<CartScreen> {
                 ),
               ),
             ),
-            
+
             const SizedBox(width: 12),
-            
+
             // Food Details
             Expanded(
               child: Column(
@@ -222,29 +226,34 @@ class _CartScreenState extends State<CartScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
+
                   // Quantity Controls
                   Row(
                     children: [
                       // Decrease Button
                       GestureDetector(
-                        onTap: () => _updateQuantity(box, item, item.quantity - 1),
+                        onTap: () =>
+                            _updateQuantity(box, item, item.quantity - 1),
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: item.quantity > 1 ? Colors.orange : Colors.grey[300],
+                            color: item.quantity > 1
+                                ? Colors.orange
+                                : Colors.grey[300],
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.remove,
                             size: 16,
-                            color: item.quantity > 1 ? Colors.white : Colors.grey[500],
+                            color: item.quantity > 1
+                                ? Colors.white
+                                : Colors.grey[500],
                           ),
                         ),
                       ),
-                      
+
                       const SizedBox(width: 12),
-                      
+
                       // Quantity Display
                       Text(
                         item.quantity.toString(),
@@ -254,12 +263,13 @@ class _CartScreenState extends State<CartScreen> {
                           color: Colors.black87,
                         ),
                       ),
-                      
+
                       const SizedBox(width: 12),
-                      
+
                       // Increase Button
                       GestureDetector(
-                        onTap: () => _updateQuantity(box, item, item.quantity + 1),
+                        onTap: () =>
+                            _updateQuantity(box, item, item.quantity + 1),
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: const BoxDecoration(
@@ -273,9 +283,9 @@ class _CartScreenState extends State<CartScreen> {
                           ),
                         ),
                       ),
-                      
+
                       const Spacer(),
-                      
+
                       // Total Price
                       Text(
                         "₹${item.totalPrice}",
@@ -285,12 +295,13 @@ class _CartScreenState extends State<CartScreen> {
                           color: Colors.black87,
                         ),
                       ),
-                      
+
                       const SizedBox(width: 8),
-                      
+
                       // Remove Button
                       IconButton(
-                        icon: Icon(Icons.delete_outline_rounded, color: Colors.red[400]),
+                        icon: Icon(Icons.delete_outline_rounded,
+                            color: Colors.red[400]),
                         onPressed: () => _removeItem(box, item),
                         iconSize: 20,
                       ),
@@ -306,7 +317,8 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildCheckoutSection(List<CartItem> cartItems) {
-    final subtotal = cartItems.fold<int>(0, (sum, item) => sum + item.totalPrice);
+    final subtotal =
+        cartItems.fold<int>(0, (sum, item) => sum + item.totalPrice);
     final deliveryFee = 40;
     final tax = (subtotal * 0.05).round();
     final total = subtotal + deliveryFee + tax;
@@ -335,9 +347,9 @@ class _CartScreenState extends State<CartScreen> {
             "₹$total",
             isTotal: true,
           ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Checkout Button
           SizedBox(
             width: double.infinity,
@@ -422,7 +434,13 @@ class _CartScreenState extends State<CartScreen> {
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                AppRoutes.mainLayout,
+                (route) => false,
+              );
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,
               foregroundColor: Colors.white,
@@ -460,7 +478,7 @@ class _CartScreenState extends State<CartScreen> {
     final itemKey = _findItemKey(box, item);
     if (itemKey != null) {
       box.delete(itemKey);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Removed ${item.name} from cart'),
@@ -498,26 +516,33 @@ class _CartScreenState extends State<CartScreen> {
             _selectedAddress = address;
           });
         },
-        onOrderConfirmed: () {
-          _processOrder(context, totalAmount);
+        onOrderConfirmed: (orderData) {
+          // This will handle showing the success screen
+          _showOrderSuccessScreen(context, orderData);
         },
       ),
     );
   }
 
-  void _processOrder(BuildContext context, int totalAmount) {
+  void _showOrderSuccessScreen(
+      BuildContext context, Map<String, dynamic> orderData) {
+    // Clear the cart
     final cartBox = Hive.box<CartItem>('cartBox');
     cartBox.clear();
-    
-    Navigator.pop(context); // Close bottom sheet
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Order placed successfully! Total: ₹$totalAmount'),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+
+    // Close the bottom sheet
+    Navigator.pop(context);
+
+    // Navigate to Order Success Screen
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OrderSuccessScreen(
+          orderData: orderData,
+          onContinueShopping: () {
+            // Go back to home screen (remove all routes)
+            Navigator.popUntil(context, (route) => route.isFirst);
+          },
         ),
       ),
     );
@@ -526,19 +551,18 @@ class _CartScreenState extends State<CartScreen> {
   String _getImageUrl(String imagePath, String imageBase) {
     try {
       String cleanedPath = imagePath.replaceAll(r'\', '/');
-      
+
       if (cleanedPath.startsWith('http')) return cleanedPath;
-      
+
       while (cleanedPath.startsWith('/')) {
         cleanedPath = cleanedPath.substring(1);
       }
-      
+
       if (!cleanedPath.contains('quickbites')) {
         cleanedPath = 'quickbites/$cleanedPath';
       }
-      
+
       return 'http://$imageBase/$cleanedPath';
-      
     } catch (e) {
       return 'https://via.placeholder.com/150?text=No+Image';
     }
@@ -551,7 +575,7 @@ class CheckoutBottomSheet extends StatefulWidget {
   final UserAdd? selectedAddress;
   final int? userId;
   final Function(UserAdd) onAddressSelected;
-  final VoidCallback onOrderConfirmed;
+  final Function(Map<String, dynamic>) onOrderConfirmed;
 
   const CheckoutBottomSheet({
     super.key,
@@ -592,16 +616,16 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
         children: [
           // Header
           _buildHeader(),
-          
+
           // Address Section
           _buildAddressSection(),
-          
+
           // Payment Method Section
           _buildPaymentSection(),
-          
+
           // Order Summary
           _buildOrderSummary(),
-          
+
           // Confirm Button
           _buildConfirmButton(),
         ],
@@ -654,7 +678,8 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
               padding: const EdgeInsets.all(12),
               child: Column(
                 children: [
-                  if (_selectedAddress != null && _selectedAddress!.id.isNotEmpty)
+                  if (_selectedAddress != null &&
+                      _selectedAddress!.id.isNotEmpty)
                     _buildAddressDetails()
                   else
                     _buildNoAddress(),
@@ -763,7 +788,13 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
         ),
         const SizedBox(height: 8),
         ElevatedButton(
-          onPressed: _showAddressSelection,
+          // onPressed: _showAddressSelection,
+          onPressed: (){
+             Navigator.pushNamed(
+          context,
+          AppRoutes.Address,
+        );
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.orange,
             foregroundColor: Colors.white,
@@ -803,7 +834,7 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
                   icon: Icons.money_rounded,
                   isEnabled: true,
                 ),
-                
+
                 // Online Payment (Disabled)
                 _buildPaymentOption(
                   method: PaymentMethod.onlinePayment,
@@ -828,19 +859,19 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
     required bool isEnabled,
   }) {
     final isSelected = _selectedPaymentMethod == method;
-    
+
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isEnabled 
+          color: isEnabled
               ? (isSelected ? Colors.orange : Colors.grey[100])
               : Colors.grey[200],
           shape: BoxShape.circle,
         ),
         child: Icon(
           icon,
-          color: isEnabled 
+          color: isEnabled
               ? (isSelected ? Colors.white : Colors.grey[600])
               : Colors.grey[400],
         ),
@@ -917,16 +948,20 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
   }
 
   Widget _buildConfirmButton() {
-    final isAddressSelected = _selectedAddress != null && _selectedAddress!.id.isNotEmpty;
-    
+    final isAddressSelected =
+        _selectedAddress != null && _selectedAddress!.id.isNotEmpty;
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: (isAddressSelected && !_isPlacingOrder) ? _confirmOrder : null,
+          onPressed:
+              (isAddressSelected && !_isPlacingOrder) ? _confirmOrder : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: (isAddressSelected && !_isPlacingOrder) ? Colors.orange : Colors.grey[400],
+            backgroundColor: (isAddressSelected && !_isPlacingOrder)
+                ? Colors.orange
+                : Colors.grey[400],
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
@@ -944,7 +979,7 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
                   ),
                 )
               : Text(
-                  isAddressSelected 
+                  isAddressSelected
                       ? "Confirm Order - ₹${widget.totalAmount}"
                       : "Select Address First",
                   style: const TextStyle(
@@ -996,7 +1031,7 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
                       leading: Icon(
-                        address.type.toLowerCase() == 'home' 
+                        address.type.toLowerCase() == 'home'
                             ? Icons.home_rounded
                             : address.type.toLowerCase() == 'work'
                                 ? Icons.work_rounded
@@ -1022,7 +1057,8 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
                         ],
                       ),
                       trailing: _selectedAddress?.id == address.id
-                          ? const Icon(Icons.check_circle_rounded, color: Colors.orange)
+                          ? const Icon(Icons.check_circle_rounded,
+                              color: Colors.orange)
                           : null,
                       onTap: () {
                         setState(() {
@@ -1074,7 +1110,8 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
           children: [
             Text("Total Amount: ₹${widget.totalAmount}"),
             const SizedBox(height: 8),
-            Text("Payment Method: ${_selectedPaymentMethod == PaymentMethod.cashOnDelivery ? 'Cash on Delivery' : 'Online Payment'}"),
+            Text(
+                "Payment Method: ${_selectedPaymentMethod == PaymentMethod.cashOnDelivery ? 'Cash on Delivery' : 'Online Payment'}"),
             const SizedBox(height: 8),
             const Text("Delivery to:"),
             Text(
@@ -1135,8 +1172,8 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
         "address_id": int.parse(_selectedAddress!.id),
         "items": orderItems,
         "total_amount": widget.totalAmount.toStringAsFixed(2),
-        "payment_method": _selectedPaymentMethod == PaymentMethod.cashOnDelivery 
-            ? "cash_on_delivery" 
+        "payment_method": _selectedPaymentMethod == PaymentMethod.cashOnDelivery
+            ? "cash_on_delivery"
             : "online_payment",
       };
 
@@ -1154,13 +1191,14 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
       Navigator.pop(context); // Close confirmation dialog
 
       if (response['success'] == true) {
-        // Show success screen
-        _showOrderSuccessScreen(response);
+        // Call the callback with order data
+        widget.onOrderConfirmed(response);
       } else {
         // Show error
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Order failed: ${response['message'] ?? 'Unknown error'}'),
+            content:
+                Text('Order failed: ${response['message'] ?? 'Unknown error'}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -1178,235 +1216,9 @@ class _CheckoutBottomSheetState extends State<CheckoutBottomSheet> {
       );
     }
   }
-
-  void _showOrderSuccessScreen(Map<String, dynamic> response) {
-    Navigator.pop(context); // Close bottom sheet
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => OrderSuccessScreen(
-          orderData: response,
-          onContinueShopping: () {
-            // Clear cart and go back to home
-            final cartBox = Hive.box<CartItem>('cartBox');
-            cartBox.clear();
-            Navigator.popUntil(context, (route) => route.isFirst);
-          },
-        ),
-      ),
-    );
-  }
 }
 
 enum PaymentMethod {
   cashOnDelivery,
   onlinePayment,
-}
-
-// Order Success Screen
-class OrderSuccessScreen extends StatelessWidget {
-  final Map<String, dynamic> orderData;
-  final VoidCallback onContinueShopping;
-
-  const OrderSuccessScreen({
-    super.key,
-    required this.orderData,
-    required this.onContinueShopping,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.green[50],
-      body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Success Icon
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.green,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check_rounded,
-                color: Colors.white,
-                size: 60,
-              ),
-            ),
-            
-            const SizedBox(height: 32),
-            
-            // Success Message
-            const Text(
-              "Order Placed Successfully!",
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.green,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Order Number
-            Text(
-              "Order #${orderData['order_number']}",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            
-            const SizedBox(height: 8),
-            
-            // Confirmation Message
-            const Text(
-              "Your order has been confirmed",
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
-            ),
-            
-            const SizedBox(height: 40),
-            
-            // Order Details Card
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  // Total Amount
-                  _buildDetailRow(
-                    "Total Amount",
-                    "₹${orderData['order']['total_amount']}",
-                    isTotal: true,
-                  ),
-                  
-                  const SizedBox(height: 12),
-                  
-                  // Payment Method
-                  _buildDetailRow(
-                    "Payment Method",
-                    _getPaymentMethodText(orderData['order']['payment_method']),
-                  ),
-                  
-                  const SizedBox(height: 12),
-                  
-                  // Order Status
-                  _buildDetailRow(
-                    "Status",
-                    _getStatusText(orderData['order']['order_status']),
-                  ),
-                  
-                  const SizedBox(height: 12),
-                  
-                  // Estimated Delivery
-                  _buildDetailRow(
-                    "Estimated Delivery",
-                    "30-45 minutes",
-                  ),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 40),
-            
-            // Continue Shopping Button
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onContinueShopping,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 3,
-                ),
-                child: const Text(
-                  "Continue Shopping",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value, {bool isTotal = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: isTotal ? 18 : 16,
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-            color: isTotal ? Colors.black87 : Colors.grey[600],
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: isTotal ? 20 : 16,
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,
-            color: isTotal ? Colors.orange : Colors.black87,
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _getPaymentMethodText(String method) {
-    switch (method) {
-      case 'cash_on_delivery':
-        return 'Cash on Delivery';
-      case 'online_payment':
-        return 'Online Payment';
-      default:
-        return method;
-    }
-  }
-
-  String _getStatusText(String status) {
-    switch (status) {
-      case 'pending':
-        return 'Pending';
-      case 'confirmed':
-        return 'Confirmed';
-      case 'preparing':
-        return 'Preparing';
-      case 'out_for_delivery':
-        return 'Out for Delivery';
-      case 'delivered':
-        return 'Delivered';
-      default:
-        return status;
-    }
-  }
 }

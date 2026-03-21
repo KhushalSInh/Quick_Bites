@@ -1,5 +1,5 @@
 // FoodDetailScreen.dart
-// ignore_for_file: avoid_print, use_build_context_synchronously
+// ignore_for_file: avoid_print, use_build_context_synchronously, non_constant_identifier_names, deprecated_member_use, sized_box_for_whitespace, unused_field
 
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -158,7 +158,8 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
               child: IconButton(
                 icon: const Icon(Icons.arrow_back_rounded, color: Colors.black),
                 onPressed: () {
-                  Navigator.pop(context, isFavorite != _initialFavoriteState);
+                  // Navigator.pop(context, isFavorite != _initialFavoriteState);
+                  Navigator.pop(context);
                 },
               ),
             ),
@@ -511,7 +512,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.shopping_cart_rounded, size: 20),
+                    // const Icon(Icons.shopping_cart_rounded, size: 20),
                     const SizedBox(width: 8),
                     const Text(
                       "Add to Cart",

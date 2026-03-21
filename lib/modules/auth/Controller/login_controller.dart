@@ -83,13 +83,11 @@ void login(BuildContext context) async {
     );
 
     Future.delayed(Duration(seconds: 2), () {
-      // Navigator.pushNamedAndRemoveUntil(
-      //   context,
-      //   AppRoutes.home,
-      //   (route) => false,
-      // );
-      Navigator.pushReplacementNamed(context, AppRoutes.mainLayout);
-    
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.mainLayout,
+        (route) => false,
+      );
 
     });
   } else {

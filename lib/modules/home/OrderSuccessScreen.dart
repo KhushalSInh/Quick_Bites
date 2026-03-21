@@ -2,6 +2,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:quick_bites/modules/home/MainLayout.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
   final Map<String, dynamic> orderData;
@@ -37,41 +38,41 @@ class OrderSuccessScreen extends StatelessWidget {
                   size: 60,
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Success Message
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   "Order Placed Successfully!",
                   style: TextStyle(
-                    fontSize: 24, // Reduced from 28
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Colors.green,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Order Number
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   "Order #${orderData['order_number']}",
                   style: const TextStyle(
-                    fontSize: 18, // Reduced from 20
+                    fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: Colors.black87,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               // Confirmation Message
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
@@ -84,13 +85,13 @@ class OrderSuccessScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
               ),
-              
+
               const SizedBox(height: 40),
-              
+
               // Order Details Card
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 8),
-                padding: const EdgeInsets.all(16), // Reduced padding
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -110,25 +111,26 @@ class OrderSuccessScreen extends StatelessWidget {
                       "₹${orderData['order']['total_amount']}",
                       isTotal: true,
                     ),
-                    
+
                     const SizedBox(height: 12),
-                    
-                    // Payment Method
+
+                    // Payment Method - Changed to "COD"
                     _buildDetailRow(
                       "Payment",
-                      _getPaymentMethodText(orderData['order']['payment_method']),
+                      _getPaymentMethodText(
+                          orderData['order']['payment_method']),
                     ),
-                    
+
                     const SizedBox(height: 12),
-                    
+
                     // Order Status
                     _buildDetailRow(
                       "Status",
                       _getStatusText(orderData['order']['order_status']),
                     ),
-                    
+
                     const SizedBox(height: 12),
-                    
+
                     // Estimated Delivery
                     _buildDetailRow(
                       "Estimated Delivery",
@@ -137,16 +139,22 @@ class OrderSuccessScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 40),
-              
+
               // Continue Shopping Button
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: onContinueShopping,
+                    onPressed: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (context) => MainLayout()),
+                        (Route<dynamic> route) =>
+                            false, // This condition is what determines which routes to keep
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       foregroundColor: Colors.white,
@@ -159,45 +167,45 @@ class OrderSuccessScreen extends StatelessWidget {
                     child: const Text(
                       "Continue Shopping",
                       style: TextStyle(
-                        fontSize: 16, // Reduced from 18
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Track Order Button
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      // Navigate to order tracking screen
-                      // You can implement this later
-                    },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.orange,
-                      side: const BorderSide(color: Colors.orange),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      "Track Order",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 8),
+              //   child: SizedBox(
+              //     width: double.infinity,
+              //     child: OutlinedButton(
+              //       onPressed: () {
+              //         // Navigate to order tracking screen
+              //         // You can implement this later
+              //       },
+              //       style: OutlinedButton.styleFrom(
+              //         foregroundColor: Colors.orange,
+              //         side: const BorderSide(color: Colors.orange),
+              //         padding: const EdgeInsets.symmetric(vertical: 16),
+              //         shape: RoundedRectangleBorder(
+              //           borderRadius: BorderRadius.circular(12),
+              //         ),
+              //       ),
+              //       child: const Text(
+              //         "Track Order",
+              //         style: TextStyle(
+              //           fontSize: 16,
+              //           fontWeight: FontWeight.w600,
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
+
               const SizedBox(height: 20),
             ],
           ),
@@ -210,11 +218,11 @@ class OrderSuccessScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Flexible(
+        Expanded(
           child: Text(
             label,
             style: TextStyle(
-              fontSize: isTotal ? 16 : 14, // Reduced font sizes
+              fontSize: isTotal ? 16 : 14,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
               color: isTotal ? Colors.black87 : Colors.grey[600],
             ),
@@ -222,11 +230,12 @@ class OrderSuccessScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Flexible(
+        Expanded(
+          flex: 2, // Give more space to the value
           child: Text(
             value,
             style: TextStyle(
-              fontSize: isTotal ? 18 : 14, // Reduced font sizes
+              fontSize: isTotal ? 18 : 14,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.w600,
               color: isTotal ? Colors.orange : Colors.black87,
             ),
@@ -241,7 +250,7 @@ class OrderSuccessScreen extends StatelessWidget {
   String _getPaymentMethodText(String method) {
     switch (method) {
       case 'cash_on_delivery':
-        return 'Cash on Delivery';
+        return 'COD'; // Changed from 'Cash on Delivery'
       case 'online_payment':
         return 'Online Payment';
       default:

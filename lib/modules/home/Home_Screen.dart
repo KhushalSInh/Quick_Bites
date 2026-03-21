@@ -1,4 +1,4 @@
-// ignore_for_file: non_constant_identifier_names, deprecated_member_use, sized_box_for_whitespace
+// ignore_for_file: non_constant_identifier_names, deprecated_member_use, sized_box_for_whitespace, curly_braces_in_flow_control_structures
 
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';

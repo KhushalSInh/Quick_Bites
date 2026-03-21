@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:quick_bites/widgets/custom_button.dart';
 import 'package:quick_bites/widgets/custom_input.dart';
-import 'package:quick_bites/widgets/custom_input_field.dart';
 
 class ProfileForms {
   /// ---------------- PERSONAL INFO FORM ----------------
