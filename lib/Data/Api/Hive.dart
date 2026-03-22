@@ -14,6 +14,9 @@ class HiveKey {
 
   static Future<void> storeItemsInHive(String jsonString) async {
     final jsonData = jsonDecode(jsonString);
+    if (jsonData == null || jsonData['error'] == true || jsonData['data'] == null) {
+      throw Exception(jsonData?['message'] ?? 'Failed to fetch items or missing data');
+    }
     final itemsList =
         (jsonData['data'] as List).map((item) => Data.fromJson(item)).toList();
 
@@ -30,6 +33,9 @@ class HiveKey {
 
  static Future<void> storeAddressesInHive(String jsonString) async {
   final jsonData = jsonDecode(jsonString);
+  if (jsonData == null || jsonData['error'] == true || jsonData['data'] == null) {
+    throw Exception(jsonData?['message'] ?? 'Failed to fetch addresses or missing data');
+  }
   final addressList = (jsonData['data'] as List)
       .map((item) => UserAdd.fromJson(item))
       .toList();
@@ -47,6 +53,9 @@ class HiveKey {
 
   static Future<void> storeCategoriesInHive(String jsonString) async {
     final jsonData = jsonDecode(jsonString);
+    if (jsonData == null || jsonData['error'] == true || jsonData['data'] == null) {
+      throw Exception(jsonData?['message'] ?? 'Failed to fetch categories or missing data');
+    }
     final categoriesList = (jsonData['data'] as List)
         .map((item) => FoodCategory.fromJson(item))
         .toList();
@@ -73,7 +82,7 @@ class DataManage {
       // Store in Hive using your existing method
       await HiveKey.storeItemsInHive(jsonEncode(response));
 
-      // print('✅ Items fetched and stored in Hive successfully');
+      print('✅ Items fetched and stored in Hive successfully');
     } catch (e) {
       print('❌ Error fetching or storing food items: $e');
     }

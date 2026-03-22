@@ -7,7 +7,7 @@ import 'dart:async';
 
 class ApiDetails {
   // static String ip = "[IP_ADDRESS]";
-   static String ip = "10.228.151.123";
+   static String ip = "10.180.64.123";  // Updated dynamically based on local network IP
    
   static String get loginApi => "http://$ip/quickbites/login.php";
   static String get singupApi => "http://$ip/quickbites/singup.php";
@@ -15,7 +15,7 @@ class ApiDetails {
   static String get changePasswordApi =>"http://$ip/quickbites/Change_password.php";
   static String get ResetPasswordApi =>"http://$ip/quickbites/ResetPassword.php";
 
-  static String get fooditems => "http://$ip/quickbites/Items.php";
+  static String get fooditems => "http://$ip/quickbites/items.php";
 
   static String get getAddress => "http://$ip/quickbites/GetAddress.php";
   static String get addAddress => "http://$ip/quickbites/InsertAddress.php";
@@ -26,7 +26,7 @@ class ApiDetails {
   static String get OrderHistory => "http://$ip/quickbites/OrderHistory.php";
   static String get cancelorder => "http://$ip/quickbites/CancelOrder.php";
 
-  static String get foodCategories => "http://$ip/quickbites/Categories.php";
+  static String get foodCategories => "http://$ip/quickbites/categories.php";
   static String get itemsByCategory =>"http://$ip/quickbites/ItemsByCategory.php";
 
   static String get getprofile => "http://$ip/quickbites/GetUser.php";
