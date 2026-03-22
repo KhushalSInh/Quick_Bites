@@ -5,7 +5,7 @@
     android:name=".QuickBites"
     android:label="Quick Bites"
     android:enableOnBackInvokedCallback="true"
-    android:usesCleartextTraffic="true"
+    android:usesCleartextTraffic="true" 
     android:icon="@mipmap/ic_launcher">
 
 
